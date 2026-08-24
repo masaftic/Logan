@@ -5,6 +5,8 @@ using Api.Endpoints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
+using Wolverine;
+using Wolverine.RabbitMQ;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +38,12 @@ var connectionString = builder.Configuration.GetConnectionString("Database")
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+builder.Host.UseWolverine(opts =>
+{
+    var rabbitUri = new Uri(builder.Configuration.GetConnectionString("RabbitMQ") ?? "amqp://guest:guest@localhost:5672");
+    opts.UseRabbitMq(rabbitUri).AutoProvision();
+});
 
 var app = builder.Build();
 

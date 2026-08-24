@@ -1,7 +1,9 @@
 using Api.Data;
 using Api.DTOs;
 using Api.Models;
+using Contracts;
 using Microsoft.EntityFrameworkCore;
+using Wolverine;
 
 namespace Api.Endpoints;
 
@@ -12,7 +14,7 @@ public static class OrderEndpoints
         var group = app.MapGroup("/api/orders")
             .WithTags("Orders");
 
-        group.MapPost("/", async (CreateOrderRequest request, OrderDbContext dbContext, CancellationToken ct) =>
+        group.MapPost("/", async (CreateOrderRequest request, OrderDbContext dbContext, IMessageBus bus, CancellationToken ct) =>
         {
             var order = new Order
             {
@@ -24,6 +26,12 @@ public static class OrderEndpoints
 
             dbContext.Orders.Add(order);
             await dbContext.SaveChangesAsync(ct);
+
+            await bus.PublishAsync(new OrderSubmitted(
+                order.Id,
+                order.Amount,
+                order.CreatedAtUtc
+            ));
 
             var response = OrderResponse.FromEntity(order);
             return Results.Created($"/api/orders/{order.Id}", response);
@@ -61,6 +69,24 @@ public static class OrderEndpoints
         .WithName("GetOrders")
         .WithSummary("List all orders")
         .Produces<List<OrderResponse>>(StatusCodes.Status200OK);
+
+        group.MapPost("/{id:guid}/cancel", async (Guid id, OrderDbContext dbContext, CancellationToken ct) =>
+        {
+            var order = await dbContext.Orders
+                .FirstOrDefaultAsync(o => o.Id == id, ct);
+
+            if (order is null)
+                return Results.NotFound();
+
+            if (order.Status != OrderStatus.Pending)
+                return Results.BadRequest("Cannot cancel an order that is not pending.");
+
+            order.Status = OrderStatus.Canceled;
+            order.UpdatedAtUtc = DateTime.UtcNow;
+            await dbContext.SaveChangesAsync(ct);
+
+            return Results.Ok();
+        });
 
         return app;
     }
