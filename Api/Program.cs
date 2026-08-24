@@ -2,6 +2,8 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Api.Data;
 using Api.Endpoints;
+using Contracts;
+using JasperFx;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
@@ -33,16 +35,18 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddValidation();
 builder.Services.AddProblemDetails();
 
-var connectionString = builder.Configuration.GetConnectionString("Database")
-    ?? throw new InvalidOperationException("Connection string 'Database' was not found.");
+var connectionString = builder.Configuration.GetConnectionString("Database")!;
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 builder.Host.UseWolverine(opts =>
 {
-    var rabbitUri = new Uri(builder.Configuration.GetConnectionString("RabbitMQ") ?? "amqp://guest:guest@localhost:5672");
-    opts.UseRabbitMq(rabbitUri).AutoProvision();
+    var rabbitUri = new Uri(builder.Configuration.GetConnectionString("RabbitMQ")!);
+
+    opts.UseRabbitMq(rabbitUri)
+        .AutoProvision()
+        .UseConventionalRouting();
 });
 
 var app = builder.Build();
@@ -66,4 +70,4 @@ using (var scope = app.Services.CreateScope())
     await dbContext.Database.MigrateAsync();
 }
 
-app.Run();
+return await app.RunJasperFxCommands(args);

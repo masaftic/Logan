@@ -25,6 +25,9 @@ public static class OrderEndpoints
             };
 
             dbContext.Orders.Add(order);
+
+            // TODO: dual write problem
+
             await dbContext.SaveChangesAsync(ct);
 
             await bus.PublishAsync(new OrderSubmitted(
