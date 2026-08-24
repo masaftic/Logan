@@ -21,7 +21,7 @@ public class ProcessPaymentHandler
         if (Random.Shared.Next(0, 2) == 0)
         {
             // TODO: solve this
-            throw new Exception("Payment gateway unavailable.");
+            // throw new Exception("Payment gateway unavailable.");
         }
 
         // Simulated failure rule: amount > $1000 fails

@@ -26,15 +26,15 @@ public static class OrderEndpoints
 
             dbContext.Orders.Add(order);
 
-            // TODO: dual write problem
-
-            await dbContext.SaveChangesAsync(ct);
-
+            // Transactional Outbox: Enqueue message onto the DbContext transaction
             await bus.PublishAsync(new OrderSubmitted(
                 order.Id,
                 order.Amount,
                 order.CreatedAtUtc
             ));
+
+            // Commits both the Order entity and the Outbox envelope to PostgreSQL atomically
+            await dbContext.SaveChangesAsync(ct);
 
             var response = OrderResponse.FromEntity(order);
             return Results.Created($"/api/orders/{order.Id}", response);

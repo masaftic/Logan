@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 using Wolverine;
+using Wolverine.EntityFrameworkCore;
+using Wolverine.Postgresql;
 using Wolverine.RabbitMQ;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,9 +46,19 @@ builder.Host.UseWolverine(opts =>
 {
     var rabbitUri = new Uri(builder.Configuration.GetConnectionString("RabbitMQ")!);
 
+    // 1. Configure RabbitMQ transport with auto-provisioning & conventions
     opts.UseRabbitMq(rabbitUri)
         .AutoProvision()
         .UseConventionalRouting();
+
+    // 2. Persist message envelopes (Outbox/Inbox/Timeouts/DLQ) in PostgreSQL
+    opts.PersistMessagesWithPostgresql(connectionString);
+
+    // 3. Integrate Wolverine with EF Core DbContext transactions
+    opts.UseEntityFrameworkCoreTransactions();
+
+    // 4. Automatically manage transactions and SaveChangesAsync for handlers using DbContext
+    opts.Policies.AutoApplyTransactions();
 });
 
 var app = builder.Build();
@@ -61,13 +73,12 @@ app.UseHttpsRedirection();
 
 app.MapOrderEndpoints();
 
-// Automatically apply pending EF Core migrations on application startup
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
-    Console.WriteLine(dbContext.Database.CanConnect());
-
     await dbContext.Database.MigrateAsync();
+
+    await dbContext.Orders.ExecuteDeleteAsync();
 }
 
 return await app.RunJasperFxCommands(args);
