@@ -8,14 +8,6 @@ public record PaymentIntentResponse(
     string Status
 );
 
-public record PaymentWebhookRequest(
-    string EventType,
-    Guid OrderId,
-    string GatewayTransactionId,
-    decimal Amount,
-    string? FailureReason = null
-);
-
 public record PaymentResponse(
     Guid Id,
     decimal Amount,

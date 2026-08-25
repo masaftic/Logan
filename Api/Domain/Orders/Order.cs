@@ -30,13 +30,17 @@ public class Order
         };
     }
 
-    public void StartProcessing()
+    public Payment AddPaymentAttempt(string idempotencyKey, string? gatewayTransactionId = null)
     {
-        if (Status != OrderStatus.Pending)
-            return;
+        if (Status == OrderStatus.Completed)
+            throw new InvalidOperationException("Cannot add a payment attempt to an already completed order.");
 
-        Status = OrderStatus.Processing;
-        UpdatedAtUtc = DateTime.UtcNow;
+        if (Status == OrderStatus.Canceled || Status == OrderStatus.TimedOut)
+            throw new InvalidOperationException($"Cannot add a payment attempt to an order in '{Status}' state.");
+
+        var payment = Payment.Create(Id, Amount, idempotencyKey, gatewayTransactionId);
+        _payments.Add(payment);
+        return payment;
     }
 
     public void Complete(Guid paymentId)
@@ -46,6 +50,12 @@ public class Order
 
         if (Status == OrderStatus.Canceled || Status == OrderStatus.TimedOut)
             throw new InvalidOperationException($"Cannot complete order in '{Status}' state.");
+
+        var payment = _payments.FirstOrDefault(p => p.Id == paymentId)
+            ?? throw new InvalidOperationException($"Payment with ID '{paymentId}' does not belong to Order '{Id}'.");
+
+        if (payment.Status != PaymentStatus.Success)
+            throw new InvalidOperationException($"Cannot complete order with payment in '{payment.Status}' state.");
 
         Status = OrderStatus.Completed;
         UpdatedAtUtc = DateTime.UtcNow;
@@ -76,15 +86,5 @@ public class Order
 
         Status = OrderStatus.Canceled;
         UpdatedAtUtc = DateTime.UtcNow;
-    }
-
-    public Payment AddPaymentAttempt(string idempotencyKey, string? gatewayTransactionId = null)
-    {
-        if (Status == OrderStatus.Completed || Status == OrderStatus.Canceled || Status == OrderStatus.TimedOut)
-            throw new InvalidOperationException($"Cannot create payment attempt for order in '{Status}' state.");
-
-        var payment = Payment.Create(Id, Amount, idempotencyKey, gatewayTransactionId);
-        _payments.Add(payment);
-        return payment;
     }
 }

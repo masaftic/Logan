@@ -1,5 +1,5 @@
 using Api.Features.Payments.CreatePaymentIntent;
-using Api.Features.Payments.ReceiveWebhook;
+using Api.Features.Payments.MarkPaymentPaid;
 
 namespace Api.Features.Payments;
 
@@ -11,7 +11,7 @@ public static class PaymentEndpoints
             .WithTags("Payments");
 
         group.MapCreatePaymentIntentEndpoint();
-        group.MapReceiveWebhookEndpoint();
+        group.MapMarkPaymentPaidEndpoint();
 
         return app;
     }

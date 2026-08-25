@@ -1,6 +1,6 @@
 @Api_HostAddress = http://localhost:5242
 
-### 1. Place a new order
+### 1. Place a new order (Pure internal placement, 0 gateway coupling)
 # @name createOrder
 POST {{Api_HostAddress}}/api/orders
 Content-Type: application/json
@@ -14,24 +14,20 @@ Content-Type: application/json
 GET {{Api_HostAddress}}/api/orders/{{orderId}}
 Accept: application/json
 
-### 3. Create Payment Intent (Client-side checkout start)
+### 3. Create Payment Intent (Client starts checkout, gets clientSecret)
 # @name createIntent
 POST {{Api_HostAddress}}/api/orders/{{orderId}}/pay
 Content-Type: application/json
 
-### 4. Simulate Payment Gateway Webhook (Payment Succeeded)
-@txId = {{createIntent.response.body.paymentIntentId}}
-POST {{Api_HostAddress}}/api/webhooks/payments
+### 4. Admin / Manual Mark as Paid (Simulate completed payment)
+POST {{Api_HostAddress}}/api/orders/{{orderId}}/mark-paid
 Content-Type: application/json
 
 {
-  "eventType": "payment_intent.succeeded",
-  "orderId": "{{orderId}}",
-  "gatewayTransactionId": "{{txId}}",
-  "amount": 149.99
+  "gatewayTransactionId": "sim_tx_12345"
 }
 
-### 5. Fetch order details after Webhook (Status: Completed)
+### 5. Fetch order details after Payment (Status: Completed)
 GET {{Api_HostAddress}}/api/orders/{{orderId}}
 Accept: application/json
 

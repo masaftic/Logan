@@ -136,16 +136,8 @@ public class SimulatedPaymentGateway : IPaymentGateway
         RefundRequest request, 
         CancellationToken ct = default)
     {
-        var existingEntry = Transactions.Values.FirstOrDefault(t => t.TransactionId == request.TransactionId);
-
-        if (existingEntry is null)
-        {
-            return Task.FromResult(new RefundResult(
-                IsSuccess: false,
-                RefundId: null,
-                ErrorMessage: $"Transaction '{request.TransactionId}' not found."
-            ));
-        }
+        _logger.LogInformation("Processing Refund of {Amount:C} for Transaction {TxId}. Reason: {Reason}",
+            request.Amount, request.TransactionId, request.Reason);
 
         var refundId = Guid.NewGuid();
         return Task.FromResult(new RefundResult(

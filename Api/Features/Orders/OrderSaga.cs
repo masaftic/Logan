@@ -46,7 +46,10 @@ public class OrderSaga : Saga
         ILogger<OrderSaga> logger,
         CancellationToken ct)
     {
-        var order = await dbContext.Orders.FirstOrDefaultAsync(o => o.Id == @event.OrderId, ct);
+        var order = await dbContext.Orders
+            .Include(o => o.Payments)
+            .FirstOrDefaultAsync(o => o.Id == @event.OrderId, ct);
+
         if (order is null)
         {
             logger.LogWarning("Order {OrderId} not found when applying PaymentCompleted in Saga.", @event.OrderId);
@@ -72,7 +75,10 @@ public class OrderSaga : Saga
         ILogger<OrderSaga> logger,
         CancellationToken ct)
     {
-        var order = await dbContext.Orders.FirstOrDefaultAsync(o => o.Id == @event.OrderId, ct);
+        var order = await dbContext.Orders
+            .Include(o => o.Payments)
+            .FirstOrDefaultAsync(o => o.Id == @event.OrderId, ct);
+
         if (order is null)
         {
             logger.LogWarning("Order {OrderId} not found when applying PaymentFailed in Saga.", @event.OrderId);
@@ -98,7 +104,10 @@ public class OrderSaga : Saga
         ILogger<OrderSaga> logger,
         CancellationToken ct)
     {
-        var order = await dbContext.Orders.FirstOrDefaultAsync(o => o.Id == @event.OrderId, ct);
+        var order = await dbContext.Orders
+            .Include(o => o.Payments)
+            .FirstOrDefaultAsync(o => o.Id == @event.OrderId, ct);
+
         if (order is null)
         {
             logger.LogWarning("Order {OrderId} not found when applying OrderTimeout in Saga.", @event.OrderId);

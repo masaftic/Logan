@@ -1,3 +1,4 @@
+using Contracts.Payments.Commands;
 using Contracts.Payments.DTOs;
 using Wolverine;
 
@@ -11,7 +12,7 @@ public static class CreatePaymentIntentEndpoint
         {
             try
             {
-                var response = await bus.InvokeAsync<PaymentIntentResponse>(new Contracts.Payments.Commands.CreatePaymentIntentCommand(id));
+                var response = await bus.InvokeAsync<PaymentIntentResponse>(new CreatePaymentIntentCommand(id));
                 return Results.Ok(response);
             }
             catch (KeyNotFoundException ex)

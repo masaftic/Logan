@@ -49,7 +49,7 @@ public record PaymentStatusResult(
 );
 
 public record RefundRequest(
-    Guid TransactionId,
+    string TransactionId,
     decimal Amount,
     string Reason
 );

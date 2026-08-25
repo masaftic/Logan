@@ -1,4 +1,5 @@
 using Contracts.Orders.DTOs;
+using Contracts.Orders.Queries;
 using Wolverine;
 
 namespace Api.Features.Orders.GetOrders;
@@ -9,7 +10,7 @@ public static class GetOrdersEndpoint
     {
         endpoints.MapGet("/", async (IMessageBus bus) =>
         {
-            var orders = await bus.InvokeAsync<IReadOnlyList<OrderResponse>>(new Contracts.Orders.Queries.GetOrdersQuery());
+            var orders = await bus.InvokeAsync<IReadOnlyList<OrderResponse>>(new GetOrdersQuery());
             return Results.Ok(orders);
         })
         .WithName("GetOrders")

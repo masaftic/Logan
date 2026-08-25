@@ -38,22 +38,16 @@ public class Payment
         };
     }
 
-    public void MarkProcessing(string? gatewayTransactionId = null)
-    {
-        if (Status != PaymentStatus.Initiated)
-            return;
-
-        Status = PaymentStatus.Processing;
-        if (!string.IsNullOrWhiteSpace(gatewayTransactionId))
-        {
-            GatewayTransactionId = gatewayTransactionId;
-        }
-    }
-
     public void MarkSuccess(string gatewayTransactionId)
     {
+        if (string.IsNullOrWhiteSpace(gatewayTransactionId))
+            throw new ArgumentException("Gateway transaction ID is required to mark payment as success.", nameof(gatewayTransactionId));
+
         if (Status == PaymentStatus.Success)
-            return;
+            return; // Idempotent
+
+        if (Status == PaymentStatus.Failed)
+            throw new InvalidOperationException("Cannot mark a failed payment attempt as success.");
 
         Status = PaymentStatus.Success;
         GatewayTransactionId = gatewayTransactionId;
@@ -62,6 +56,9 @@ public class Payment
 
     public void MarkFailed(string reason)
     {
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Failure reason is required.", nameof(reason));
+
         if (Status == PaymentStatus.Success)
             throw new InvalidOperationException("Cannot mark a successful payment as failed.");
 

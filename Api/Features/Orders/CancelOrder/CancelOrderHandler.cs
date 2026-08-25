@@ -1,4 +1,5 @@
 using Api.Data;
+using Contracts.Orders.Commands;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Features.Orders.CancelOrder;
@@ -6,7 +7,7 @@ namespace Api.Features.Orders.CancelOrder;
 public static class CancelOrderHandler
 {
     public static async Task<bool> Handle(
-        Contracts.Orders.Commands.CancelOrderCommand command,
+        CancelOrderCommand command,
         OrderDbContext dbContext,
         CancellationToken ct)
     {

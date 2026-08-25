@@ -1,5 +1,6 @@
 using Api.Data;
 using Api.Domain.Orders;
+using Contracts.Orders.Commands;
 using Contracts.Orders.DTOs;
 using Contracts.Orders.Events;
 
@@ -7,7 +8,7 @@ namespace Api.Features.Orders.CreateOrder;
 
 public static class CreateOrderHandler
 {
-    public static (OrderResponse, OrderSubmitted) Handle(Contracts.Orders.Commands.CreateOrderCommand command, OrderDbContext dbContext)
+    public static (OrderResponse, OrderSubmitted) Handle(CreateOrderCommand command, OrderDbContext dbContext)
     {
         var order = Order.Create(command.Amount);
 

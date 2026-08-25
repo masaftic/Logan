@@ -1,3 +1,4 @@
+using Contracts.Orders.Commands;
 using Wolverine;
 
 namespace Api.Features.Orders.CancelOrder;
@@ -10,7 +11,7 @@ public static class CancelOrderEndpoint
         {
             try
             {
-                var found = await bus.InvokeAsync<bool>(new Contracts.Orders.Commands.CancelOrderCommand(id));
+                var found = await bus.InvokeAsync<bool>(new CancelOrderCommand(id));
                 return found 
                     ? Results.Ok(new { Message = "Order cancelled successfully." }) 
                     : Results.NotFound(new { Message = $"Order with ID '{id}' was not found." });
