@@ -1,7 +1,9 @@
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Api.Data;
-using Api.Endpoints;
+using Api.Features.Orders;
+using Api.Features.Payments;
+using Api.Features.Payments.Services;
 using Contracts;
 using JasperFx;
 using Microsoft.EntityFrameworkCore;
@@ -34,13 +36,14 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
-builder.Services.AddValidation();
 builder.Services.AddProblemDetails();
 
 var connectionString = builder.Configuration.GetConnectionString("Database")!;
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+builder.Services.AddSingleton<IPaymentGateway, SimulatedPaymentGateway>();
 
 builder.Host.UseWolverine(opts =>
 {
@@ -72,13 +75,12 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapOrderEndpoints();
+app.MapPaymentEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
     await dbContext.Database.MigrateAsync();
-
-    await dbContext.Orders.ExecuteDeleteAsync();
 }
 
 return await app.RunJasperFxCommands(args);

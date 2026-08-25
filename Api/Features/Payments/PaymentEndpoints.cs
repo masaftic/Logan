@@ -1,0 +1,18 @@
+using Api.Features.Payments.CreatePaymentIntent;
+using Api.Features.Payments.ReceiveWebhook;
+
+namespace Api.Features.Payments;
+
+public static class PaymentEndpoints
+{
+    public static IEndpointRouteBuilder MapPaymentEndpoints(this IEndpointRouteBuilder app)
+    {
+        var group = app.MapGroup("/api")
+            .WithTags("Payments");
+
+        group.MapCreatePaymentIntentEndpoint();
+        group.MapReceiveWebhookEndpoint();
+
+        return app;
+    }
+}
