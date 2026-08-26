@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Thinktecture;
 
 namespace BuildingBlocks.Persistence.Extensions;
 
@@ -33,7 +34,8 @@ public static class PersistenceExtensions
                     maxRetryDelay: TimeSpan.FromSeconds(5),
                     errorCodesToAdd: null);
             })
-            .UseSnakeCaseNamingConvention();
+            .UseSnakeCaseNamingConvention()
+            .UseThinktectureValueConverters();
         });
 
         return services;
