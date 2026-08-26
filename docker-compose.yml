@@ -4,7 +4,7 @@ services:
   # -----------------------------------------------------------
   postgres:
     image: postgis/postgis:16-3.5
-    container_name: masstransit-postgres
+    container_name: logan-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: orders_db
@@ -22,7 +22,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:4.0-management
-    container_name: masstransit-rabbitmq
+    container_name: logan-rabbitmq
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: guest
@@ -50,6 +50,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__Database=Host=postgres;Port=5432;Database=orders_db;Username=postgres;Password=postgres
+      - ConnectionStrings__RabbitMQ=amqp://guest:guest@rabbitmq:5672
     ports:
       - "5001:8080"
     depends_on:
@@ -67,6 +69,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__Database=Host=postgres;Port=5432;Database=orders_db;Username=postgres;Password=postgres
+      - ConnectionStrings__RabbitMQ=amqp://guest:guest@rabbitmq:5672
     ports:
       - "5002:8080"
     depends_on:
@@ -87,6 +91,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
+      - ReverseProxy__Clusters__ordering-cluster__Destinations__destination1__Address=http://ordering-api:8080
+      - ReverseProxy__Clusters__inventory-cluster__Destinations__destination1__Address=http://inventory-api:8080
     ports:
       - "5000:8080"
     depends_on:

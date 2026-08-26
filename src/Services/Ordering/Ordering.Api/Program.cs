@@ -1,13 +1,19 @@
 using BuildingBlocks.Common.Extensions;
+using BuildingBlocks.Messaging.Extensions;
+using BuildingBlocks.Persistence.Extensions;
+using JasperFx;
+using Ordering.Api.Data;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add standard OpenTelemetry, health checks, and service defaults
 builder.AddServiceDefaults();
-
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
+
+builder.Services.AddPostgresDbContext<OrderDbContext>(builder.Configuration, schemaName: OrderDbContext.SchemaName);
+
+builder.Host.AddMessaging(builder.Configuration, schemaName: OrderDbContext.SchemaName);
 
 var app = builder.Build();
 
@@ -22,16 +28,18 @@ if (app.Environment.IsDevelopment())
 app.MapGet("/", () => Results.Ok(new
 {
     Service = "Ordering.Api",
+    Schema = OrderDbContext.SchemaName,
     Status = "Healthy",
-    Version = "1.0.0",
     Timestamp = DateTime.UtcNow
 }));
 
 app.MapGet("/api/orders/hello", () => Results.Ok(new
 {
     Message = "Hello from Ordering Service!",
-    OrderId = Guid.NewGuid(),
-    CreatedAt = DateTime.UtcNow
+    Schema = OrderDbContext.SchemaName,
+    Timestamp = DateTime.UtcNow
 }));
 
-app.Run();
+await app.ApplyMigrationsAsync<OrderDbContext>();
+
+return await app.RunJasperFxCommands(args);

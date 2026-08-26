@@ -3,15 +3,16 @@ WORKDIR /app
 
 # Copy project files
 COPY src/BuildingBlocks/BuildingBlocks.Common/BuildingBlocks.Common.csproj src/BuildingBlocks/BuildingBlocks.Common/
+COPY src/BuildingBlocks/BuildingBlocks.Persistence/BuildingBlocks.Persistence.csproj src/BuildingBlocks/BuildingBlocks.Persistence/
+COPY src/BuildingBlocks/BuildingBlocks.Messaging/BuildingBlocks.Messaging.csproj src/BuildingBlocks/BuildingBlocks.Messaging/
 COPY src/Services/Ordering/Ordering.Contracts/Ordering.Contracts.csproj src/Services/Ordering/Ordering.Contracts/
 COPY src/Services/Ordering/Ordering.Api/Ordering.Api.csproj src/Services/Ordering/Ordering.Api/
 
 RUN dotnet restore src/Services/Ordering/Ordering.Api/Ordering.Api.csproj
 
 # Copy source code
-COPY src/BuildingBlocks/BuildingBlocks.Common/ src/BuildingBlocks/BuildingBlocks.Common/
-COPY src/Services/Ordering/Ordering.Contracts/ src/Services/Ordering/Ordering.Contracts/
-COPY src/Services/Ordering/Ordering.Api/ src/Services/Ordering/Ordering.Api/
+COPY src/BuildingBlocks/ src/BuildingBlocks/
+COPY src/Services/Ordering/ src/Services/Ordering/
 
 WORKDIR /app/src/Services/Ordering/Ordering.Api
 RUN dotnet publish -c Release -o /out

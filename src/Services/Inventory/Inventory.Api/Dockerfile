@@ -3,15 +3,16 @@ WORKDIR /app
 
 # Copy project files
 COPY src/BuildingBlocks/BuildingBlocks.Common/BuildingBlocks.Common.csproj src/BuildingBlocks/BuildingBlocks.Common/
+COPY src/BuildingBlocks/BuildingBlocks.Persistence/BuildingBlocks.Persistence.csproj src/BuildingBlocks/BuildingBlocks.Persistence/
+COPY src/BuildingBlocks/BuildingBlocks.Messaging/BuildingBlocks.Messaging.csproj src/BuildingBlocks/BuildingBlocks.Messaging/
 COPY src/Services/Inventory/Inventory.Contracts/Inventory.Contracts.csproj src/Services/Inventory/Inventory.Contracts/
 COPY src/Services/Inventory/Inventory.Api/Inventory.Api.csproj src/Services/Inventory/Inventory.Api/
 
 RUN dotnet restore src/Services/Inventory/Inventory.Api/Inventory.Api.csproj
 
 # Copy source code
-COPY src/BuildingBlocks/BuildingBlocks.Common/ src/BuildingBlocks/BuildingBlocks.Common/
-COPY src/Services/Inventory/Inventory.Contracts/ src/Services/Inventory/Inventory.Contracts/
-COPY src/Services/Inventory/Inventory.Api/ src/Services/Inventory/Inventory.Api/
+COPY src/BuildingBlocks/ src/BuildingBlocks/
+COPY src/Services/Inventory/ src/Services/Inventory/
 
 WORKDIR /app/src/Services/Inventory/Inventory.Api
 RUN dotnet publish -c Release -o /out

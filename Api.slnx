@@ -5,6 +5,8 @@
   </Folder>
   <Folder Name="/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/BuildingBlocks.Common/BuildingBlocks.Common.csproj" />
+    <Project Path="src/BuildingBlocks/BuildingBlocks.Persistence/BuildingBlocks.Persistence.csproj" />
+    <Project Path="src/BuildingBlocks/BuildingBlocks.Messaging/BuildingBlocks.Messaging.csproj" />
   </Folder>
   <Folder Name="/Host/">
     <Project Path="src/Host/ApiGateway/ApiGateway.csproj" />
