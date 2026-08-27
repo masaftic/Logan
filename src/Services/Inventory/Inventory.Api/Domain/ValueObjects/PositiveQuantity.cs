@@ -1,6 +1,6 @@
 using Thinktecture;
 
-namespace BuildingBlocks.Common.ValueObjects;
+namespace Inventory.Api.Domain.ValueObjects;
 
 [ValueObject<int>]
 public readonly partial struct PositiveQuantity

@@ -1,7 +1,7 @@
 using BuildingBlocks.Common.Results;
-using BuildingBlocks.Common.ValueObjects;
 using Inventory.Api.Domain.Enums;
 using Inventory.Api.Domain.Errors;
+using Inventory.Api.Domain.ValueObjects;
 
 namespace Inventory.Api.Domain;
 

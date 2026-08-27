@@ -1,5 +1,5 @@
-using BuildingBlocks.Common.ValueObjects;
 using Inventory.Api.Domain.Enums;
+using Inventory.Api.Domain.ValueObjects;
 
 namespace Inventory.Api.Domain;
 

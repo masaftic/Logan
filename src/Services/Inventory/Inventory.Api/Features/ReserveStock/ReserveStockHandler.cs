@@ -1,5 +1,5 @@
 using BuildingBlocks.Common.Results;
-using BuildingBlocks.Common.ValueObjects;
+using Inventory.Api.Domain.ValueObjects;
 using Inventory.Api.Data;
 using Inventory.Api.Data.Extensions;
 using Inventory.Api.Domain;

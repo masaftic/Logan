@@ -1,4 +1,4 @@
-using BuildingBlocks.Common.ValueObjects;
+using Inventory.Api.Domain.ValueObjects;
 using Inventory.Api.Domain;
 using Microsoft.EntityFrameworkCore;
 
