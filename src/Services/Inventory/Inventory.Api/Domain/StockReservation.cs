@@ -7,6 +7,9 @@ namespace Inventory.Api.Domain;
 
 public class StockReservation
 {
+    public static readonly TimeSpan DefaultHoldDuration = TimeSpan.FromMinutes(10);
+    public static readonly TimeSpan MaxHoldDuration = TimeSpan.FromHours(1);
+
     public Guid Id { get; private set; }
     public Guid OrderId { get; private set; }
     public string Sku { get; private set; } = null!;
@@ -24,6 +27,12 @@ public class StockReservation
         PositiveQuantity quantity,
         TimeSpan? holdDuration = null)
     {
+        var duration = holdDuration ?? DefaultHoldDuration;
+        if (duration > MaxHoldDuration)
+        {
+            duration = MaxHoldDuration;
+        }
+
         var now = DateTime.UtcNow;
         return new StockReservation
         {
@@ -33,7 +42,7 @@ public class StockReservation
             Quantity = quantity,
             Status = ReservationStatus.Active,
             CreatedAtUtc = now,
-            ExpiresAtUtc = holdDuration.HasValue ? now.Add(holdDuration.Value) : null
+            ExpiresAtUtc = now.Add(duration)
         };
     }
 

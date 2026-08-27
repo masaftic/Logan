@@ -13,6 +13,6 @@ public readonly partial struct PositiveQuantity
         }
     }
 
-    public static implicit operator Quantity(PositiveQuantity positiveQuantity) => Quantity.Create((int)positiveQuantity);
+    public static implicit operator Quantity(PositiveQuantity positiveQuantity) => Quantity.Create(positiveQuantity);
 }
 

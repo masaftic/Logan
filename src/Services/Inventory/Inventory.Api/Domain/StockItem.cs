@@ -44,7 +44,7 @@ public class StockItem
 
         return StockMovement.Create(
             Sku,
-            quantityDelta: (int)quantity,
+            quantityDelta: quantity,
             availableAfter: QuantityAvailable,
             reservedAfter: QuantityReserved,
             type: StockMovementType.Restock,

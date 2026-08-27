@@ -6,8 +6,17 @@ public record StockMovementDto(
     int QuantityDelta,
     int AvailableAfter,
     int ReservedAfter,
-    string Type,
+    StockMovementType Type,
     string? ReferenceId,
     DateTime CreatedAtUtc
 );
 
+
+public enum StockMovementType
+{
+    Restock = 1,
+    Reservation = 2,
+    Release = 3,
+    FulfillmentDeduction = 4,
+    Adjustment = 5
+}

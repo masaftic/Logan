@@ -25,6 +25,12 @@ public class ReserveStockCommandValidator : AbstractValidator<ReserveStockComman
                 .GreaterThan(0)
                 .WithMessage("Quantity must be greater than zero.");
         });
+
+        RuleFor(x => x.HoldDurationMinutes)
+            .GreaterThan(0)
+            .LessThanOrEqualTo(60)
+            .When(x => x.HoldDurationMinutes.HasValue)
+            .WithMessage("HoldDurationMinutes must be between 1 and 60 minutes.");
     }
 }
 

@@ -1,4 +1,5 @@
 using Inventory.Api.Domain;
+using Inventory.Api.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Inventory.Api.Data.Extensions;
@@ -7,20 +8,25 @@ public static class InventoryDbContextExtensions
 {
     public static async Task<Dictionary<string, StockItem>> LockStockItemsForUpdateAsync(
         this InventoryDbContext dbContext,
-        IReadOnlyList<string> sortedSkus,
+        IReadOnlyList<string> skus,
         CancellationToken ct = default)
     {
-        if (sortedSkus.Count == 0)
+        if (skus.Count == 0)
         {
             return [];
         }
 
-        var skuArray = sortedSkus.ToArray();
+        string[] sortedSkus = skus
+            .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
 
         var stockItems = await dbContext.StockItems
-            .FromSqlInterpolated($"SELECT *, xmin FROM inventory.stock_items WHERE sku = ANY({skuArray}) ORDER BY sku FOR UPDATE")
+            .FromSqlInterpolated($"SELECT *, xmin FROM inventory.stock_items WHERE sku = ANY({sortedSkus}) ORDER BY sku FOR UPDATE")
             .ToDictionaryAsync(s => s.Sku, ct);
 
         return stockItems;
     }
+
+    public static IQueryable<StockReservation> WhereActiveForOrder(this IQueryable<StockReservation> reservations, Guid orderId)
+        => reservations.Where(r => r.OrderId == orderId && r.Status == ReservationStatus.Active);
 }

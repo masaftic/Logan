@@ -2,9 +2,6 @@ using BuildingBlocks.Common.Extensions;
 using BuildingBlocks.Common.Results;
 using Inventory.Contracts.DTOs;
 using Inventory.Contracts.Queries;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Wolverine;
 
 namespace Inventory.Api.Features.GetStock;
@@ -21,6 +18,7 @@ public static class GetStockEndpoint
             var result = await bus.InvokeAsync<Result<StockItemDto>>(query, ct);
             return result.ToHttpResult();
         })
+        .Produces<StockItemDto>(StatusCodes.Status200OK)
         .WithName("GetStockBySku")
         .WithSummary("Retrieve current stock levels for a specific SKU")
         .WithTags("Inventory");

@@ -22,23 +22,22 @@ public static class MessagingExtensions
     {
         return hostBuilder.UseWolverine(opts =>
         {
-            var rabbitUriString = configuration.GetConnectionString("RabbitMQ")
-                ?? "amqp://guest:guest@localhost:5672";
-            var rabbitUri = new Uri(rabbitUriString);
-
-            var dbConnectionString = configuration.GetConnectionString("Database")
-                ?? throw new InvalidOperationException("Database connection string is required for Wolverine message persistence.");
+            var rabbitUri = new Uri(configuration.GetConnectionString("RabbitMQ")!);
+            var dbConnectionString = configuration.GetConnectionString("Database")!;
 
             opts.ApplicationAssembly = applicationAssembly;
 
-            // RabbitMQ Transport with conventional routing for Commands and Events (excluding Queries)
+            // RabbitMQ Transport with conventional routing for Commands and Events (excluding Queries, DTOs, and internal results)
             opts.UseRabbitMq(rabbitUri)
                 .AutoProvision()
                 .UseConventionalRouting(conventions =>
                 {
                     conventions.IncludeTypes(type =>
-                        (type.Namespace?.Contains("Queries") != true) &&
-                        !type.Name.EndsWith("Query"));
+                        (type.Namespace?.EndsWith("Commands") == true || type.Name.EndsWith("Command") ||
+                         type.Namespace?.EndsWith("Events") == true || type.Name.EndsWith("Event")) &&
+                        type.Namespace?.Contains("Queries") != true &&
+                        !type.Name.EndsWith("Query") &&
+                        type.Assembly.GetName().Name != "BuildingBlocks.Common");
                 });
 
             // Persist message envelopes in PostgreSQL
