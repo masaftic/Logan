@@ -36,7 +36,7 @@ public class StockItem
         };
     }
 
-    public Result<StockMovement> Restock(PositiveQuantity quantity, string? referenceId = null)
+    public StockMovement Restock(PositiveQuantity quantity, string? referenceId = null)
     {
         QuantityAvailable += quantity;
         QuantityOnHand += quantity;
@@ -75,7 +75,7 @@ public class StockItem
         );
     }
 
-    public Result<StockMovement> Release(PositiveQuantity quantity, string? referenceId = null)
+    public StockMovement Release(PositiveQuantity quantity, string? referenceId = null)
     {
         QuantityReserved -= quantity;
         QuantityAvailable += quantity;
@@ -91,7 +91,7 @@ public class StockItem
         );
     }
 
-    public Result<StockMovement> ConfirmDeduction(PositiveQuantity quantity, string? referenceId = null)
+    public StockMovement ConfirmDeduction(PositiveQuantity quantity, string? referenceId = null)
     {
         QuantityReserved -= quantity;
         QuantityOnHand -= quantity;

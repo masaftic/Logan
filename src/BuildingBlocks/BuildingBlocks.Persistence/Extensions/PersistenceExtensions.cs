@@ -29,10 +29,6 @@ public static class PersistenceExtensions
                 {
                     npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", schemaName);
                 }
-                npgsqlOptions.EnableRetryOnFailure(
-                    maxRetryCount: 5,
-                    maxRetryDelay: TimeSpan.FromSeconds(5),
-                    errorCodesToAdd: null);
             })
             .UseSnakeCaseNamingConvention()
             .UseThinktectureValueConverters();

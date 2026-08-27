@@ -1,6 +1,7 @@
 using BuildingBlocks.Common.Extensions;
 using BuildingBlocks.Messaging.Extensions;
 using BuildingBlocks.Persistence.Extensions;
+using FluentValidation;
 using JasperFx;
 using Ordering.Api.Data;
 using Scalar.AspNetCore;
@@ -13,7 +14,10 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddPostgresDbContext<OrderDbContext>(builder.Configuration, schemaName: OrderDbContext.SchemaName);
 
-builder.Host.AddMessaging(builder.Configuration, schemaName: OrderDbContext.SchemaName);
+builder.Host.AddMessaging(
+    builder.Configuration, 
+    applicationAssembly: typeof(Program).Assembly,
+    schemaName: OrderDbContext.SchemaName);
 
 var app = builder.Build();
 

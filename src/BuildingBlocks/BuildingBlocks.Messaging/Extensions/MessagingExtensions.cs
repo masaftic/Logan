@@ -1,9 +1,11 @@
+using System.Reflection;
 using JasperFx.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
 using Wolverine.ErrorHandling;
+using Wolverine.FluentValidation;
 using Wolverine.Postgresql;
 using Wolverine.RabbitMQ;
 
@@ -14,6 +16,7 @@ public static class MessagingExtensions
     public static IHostBuilder AddMessaging(
         this IHostBuilder hostBuilder,
         IConfiguration configuration,
+        Assembly applicationAssembly,
         string? schemaName = null,
         Action<WolverineOptions>? configure = null)
     {
@@ -26,26 +29,28 @@ public static class MessagingExtensions
             var dbConnectionString = configuration.GetConnectionString("Database")
                 ?? throw new InvalidOperationException("Database connection string is required for Wolverine message persistence.");
 
-            // 1. RabbitMQ Transport with auto-provisioning and conventions
+            opts.ApplicationAssembly = applicationAssembly;
+
+            // RabbitMQ Transport with conventional routing for Commands and Events (excluding Queries)
             opts.UseRabbitMq(rabbitUri)
                 .AutoProvision()
-                .UseConventionalRouting();
+                .UseConventionalRouting(conventions =>
+                {
+                    conventions.IncludeTypes(type =>
+                        (type.Namespace?.Contains("Queries") != true) &&
+                        !type.Name.EndsWith("Query"));
+                });
 
-            // 2. Persist message envelopes in PostgreSQL (using service schema if provided)
-            if (!string.IsNullOrWhiteSpace(schemaName))
-            {
-                opts.PersistMessagesWithPostgresql(dbConnectionString, schemaName);
-            }
-            else
-            {
-                opts.PersistMessagesWithPostgresql(dbConnectionString);
-            }
+            // Persist message envelopes in PostgreSQL
+            opts.PersistMessagesWithPostgresql(dbConnectionString, schemaName);
 
-            // 3. EF Core Transaction Integration
+            // EF Core Transaction Integration
             opts.UseEntityFrameworkCoreTransactions();
             opts.Policies.AutoApplyTransactions();
 
-            // 4. Global Resilience Policy (Exponential Backoff for Transient Failures)
+            opts.UseFluentValidation();
+
+            // Global Resilience Policy (Exponential Backoff for Transient Failures)
             opts.OnException<Exception>()
                 .RetryWithCooldown(
                     200.Milliseconds(),
@@ -53,7 +58,7 @@ public static class MessagingExtensions
                     2.Seconds()
                 );
 
-            // 5. Service-specific configurations (Sagas, Discovery, etc.)
+            // Service-specific configurations (Sagas, Discovery, etc.)
             configure?.Invoke(opts);
         });
     }
