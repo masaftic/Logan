@@ -4,20 +4,20 @@ set -euo pipefail
 # Helper script for managing EF Core migrations across microservices
 
 print_usage() {
-    echo "Usage: $0 <action> <service> [migration_name]"
+    echo "Usage: $0 <action> <service> [migration_name] <context_name>"
     echo ""
     echo "Actions:"
-    echo "  add <service> <migration_name>   Add a new migration"
-    echo "  remove <service>                 Remove the last unapplied migration"
-    echo "  list <service>                   List migrations for a service"
-    echo "  update <service>                 Apply migrations to the database"
+    echo "  add <service> <migration_name> <context_name>  Add a new migration"
+    echo "  remove <service> <context_name>                Remove the last unapplied migration"
+    echo "  list <service> <context_name>                  List migrations for a service"
+    echo "  update <service> <context_name>                Apply migrations to the database"
     echo ""
     echo "Available services: Inventory, Ordering, Payments, Fulfillment"
     echo ""
     echo "Examples:"
-    echo "  $0 add Inventory InitialCreate"
-    echo "  $0 remove Inventory"
-    echo "  $0 list Inventory"
+    echo "  $0 add Inventory InitialCreate InventoryDbContext"
+    echo "  $0 remove Inventory InventoryDbContext"
+    echo "  $0 list Inventory InventoryDbContext"
     exit 1
 }
 
@@ -31,7 +31,7 @@ SERVICE_INPUT="$2"
 # Normalize service name (capitalize first letter)
 SERVICE="$(tr '[:lower:]' '[:upper:]' <<< "${SERVICE_INPUT:0:1}")$(tr '[:upper:]' '[:lower:]' <<< "${SERVICE_INPUT:1}")"
 PROJECT_DIR="src/Services/${SERVICE}/${SERVICE}.Api"
-CONTEXT_NAME="${SERVICE}DbContext"
+CONTEXT_NAME="$4"
 
 if [ ! -d "$PROJECT_DIR" ]; then
     echo "Error: Service project directory '$PROJECT_DIR' does not exist." >&2
