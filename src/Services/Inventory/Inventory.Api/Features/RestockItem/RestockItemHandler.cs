@@ -1,5 +1,5 @@
 using BuildingBlocks.Common.Results;
-using Inventory.Api.Domain.ValueObjects;
+using BuildingBlocks.Common.ValueObjects;
 using Inventory.Api.Data;
 using Inventory.Api.Data.Extensions;
 using Inventory.Api.Domain;
@@ -18,10 +18,10 @@ public static class RestockItemHandler
         IMessageBus bus,
         CancellationToken ct)
     {
-        var sku = command.Sku.Trim().ToUpperInvariant();
+        var sku = Sku.Create(command.Sku);
         var quantity = PositiveQuantity.Create(command.Quantity);
 
-        Dictionary<string, StockItem> stockItems = await dbContext.LockStockItemsForUpdateAsync([sku], ct);
+        Dictionary<Sku, StockItem> stockItems = await dbContext.LockStockItemsForUpdateAsync([sku], ct);
 
         if (!stockItems.TryGetValue(sku, out var stockItem))
             return InventoryErrors.StockNotFound(sku);

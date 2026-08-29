@@ -1,5 +1,5 @@
 using BuildingBlocks.Common.Results;
-using Inventory.Api.Domain.ValueObjects;
+using BuildingBlocks.Common.ValueObjects;
 using Inventory.Api.Data;
 using Inventory.Api.Data.Extensions;
 using Inventory.Api.Domain;
@@ -30,15 +30,15 @@ public class ReleaseStockHandler
             return Result.Ok();
         }
 
-        List<string> skus = [.. activeReservations
-            .Select(r => r.Sku.Trim().ToUpperInvariant())
+        List<Sku> skus = [.. activeReservations
+            .Select(r => r.Sku)
             .Distinct() ];
 
-        Dictionary<string, StockItem> stockItems = await dbContext.LockStockItemsForUpdateAsync(skus, ct);
+        Dictionary<Sku, StockItem> stockItems = await dbContext.LockStockItemsForUpdateAsync(skus, ct);
 
         foreach (var reservation in activeReservations)
         {
-            var sku = reservation.Sku.Trim().ToUpperInvariant();
+            var sku = reservation.Sku;
             var stockItem = stockItems[sku];
 
             var movement = stockItem.Release(reservation.Quantity, command.OrderId.ToString());

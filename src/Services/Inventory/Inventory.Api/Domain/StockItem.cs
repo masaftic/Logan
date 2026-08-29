@@ -1,13 +1,13 @@
 using BuildingBlocks.Common.Results;
+using BuildingBlocks.Common.ValueObjects;
 using Inventory.Api.Domain.Enums;
 using Inventory.Api.Domain.Errors;
-using Inventory.Api.Domain.ValueObjects;
 
 namespace Inventory.Api.Domain;
 
 public class StockItem
 {
-    public string Sku { get; private set; } = null!;
+    public Sku Sku { get; private set; } = null!;
     public string Name { get; private set; } = null!;
     public Quantity QuantityAvailable { get; private set; }
     public Quantity QuantityReserved { get; private set; }
@@ -18,16 +18,11 @@ public class StockItem
 
     private StockItem() { }
 
-    public static Result<StockItem> Create(string sku, string name, Quantity initialQuantity)
+    public static StockItem Create(Sku sku, string name, Quantity initialQuantity)
     {
-        if (string.IsNullOrWhiteSpace(sku))
-        {
-            return Error.Validation("Sku", "SKU cannot be empty.");
-        }
-
         return new StockItem
         {
-            Sku = sku.Trim().ToUpperInvariant(),
+            Sku = sku,
             Name = name,
             QuantityAvailable = initialQuantity,
             QuantityReserved = Quantity.Zero,

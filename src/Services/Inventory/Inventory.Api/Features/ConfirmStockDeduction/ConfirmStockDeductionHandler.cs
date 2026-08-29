@@ -1,4 +1,5 @@
 using BuildingBlocks.Common.Results;
+using BuildingBlocks.Common.ValueObjects;
 using Inventory.Api.Data;
 using Inventory.Api.Data.Extensions;
 using Inventory.Api.Domain;
@@ -37,15 +38,15 @@ public static class ConfirmStockDeductionHandler
             return InventoryErrors.ReservationNotFound(command.OrderId);
         }
 
-        List<string> skus = [.. activeReservations
-            .Select(r => r.Sku.Trim().ToUpperInvariant())
+        List<Sku> skus = [.. activeReservations
+            .Select(r => r.Sku)
             .Distinct() ];
 
-        Dictionary<string, StockItem> stockItems = await dbContext.LockStockItemsForUpdateAsync(skus, ct);
+        Dictionary<Sku, StockItem> stockItems = await dbContext.LockStockItemsForUpdateAsync(skus, ct);
 
         foreach (var reservation in activeReservations)
         {
-            var sku = reservation.Sku.Trim().ToUpperInvariant();
+            var sku = Sku.Create(reservation.Sku);
             var stockItem = stockItems[sku];
 
             var movement = stockItem.ConfirmDeduction(reservation.Quantity, command.OrderId.ToString());
@@ -55,7 +56,7 @@ public static class ConfirmStockDeductionHandler
         }
 
         List<StockReservationItemDto> deductedItems = [.. activeReservations
-            .Select(r => new StockReservationItemDto(r.Sku, (int)r.Quantity))];
+            .Select(r => new StockReservationItemDto(r.Sku, r.Quantity))];
 
         var deductedEvent = new StockDeductedEvent(
             command.OrderId,

@@ -10,8 +10,8 @@ public static class ErrorFactoryMethods
         public static Error Conflict(string code = "General.Conflict", string description = "Resource conflict", Dictionary<string, object>? metadata = null)
             => new(ErrorType.Conflict, code, description, metadata);
 
-        public static Error Validation(string field = "General.Validation", string description = "Validation error", Dictionary<string, object>? metadata = null)
-            => new(ErrorType.Validation, field, description, metadata);
+        public static Error Validation(string code = "General.Validation", string description = "Validation error", Dictionary<string, object>? metadata = null)
+            => new(ErrorType.Validation, code, description, metadata);
 
         public static Error Unauthorized(string code = "General.Unauthorized", string description = "Unauthorized access", Dictionary<string, object>? metadata = null)
             => new(ErrorType.Unauthorized, code, description, metadata);

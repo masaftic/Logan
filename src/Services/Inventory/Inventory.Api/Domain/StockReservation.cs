@@ -1,7 +1,7 @@
 using BuildingBlocks.Common.Results;
-using Inventory.Api.Domain.ValueObjects;
 using Inventory.Api.Domain.Enums;
 using Inventory.Api.Domain.Errors;
+using BuildingBlocks.Common.ValueObjects;
 
 namespace Inventory.Api.Domain;
 
@@ -12,7 +12,7 @@ public class StockReservation
 
     public Guid Id { get; private set; }
     public Guid OrderId { get; private set; }
-    public string Sku { get; private set; } = null!;
+    public Sku Sku { get; private set; } = null!;
     public PositiveQuantity Quantity { get; private set; }
     public ReservationStatus Status { get; private set; }
     public DateTime CreatedAtUtc { get; private set; }
@@ -23,7 +23,7 @@ public class StockReservation
 
     public static Result<StockReservation> Create(
         Guid orderId,
-        string sku,
+        Sku sku,
         PositiveQuantity quantity,
         TimeSpan? holdDuration = null)
     {

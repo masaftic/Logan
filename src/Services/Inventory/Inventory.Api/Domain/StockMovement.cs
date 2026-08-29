@@ -1,12 +1,12 @@
+using BuildingBlocks.Common.ValueObjects;
 using Inventory.Api.Domain.Enums;
-using Inventory.Api.Domain.ValueObjects;
 
 namespace Inventory.Api.Domain;
 
 public class StockMovement
 {
     public Guid Id { get; private set; }
-    public string Sku { get; private set; } = null!;
+    public Sku Sku { get; private set; } = null!;
     public int QuantityDelta { get; private set; }
     public Quantity AvailableAfter { get; private set; }
     public Quantity ReservedAfter { get; private set; }
@@ -17,7 +17,7 @@ public class StockMovement
     private StockMovement() { }
 
     public static StockMovement Create(
-        string sku,
+        Sku sku,
         int quantityDelta,
         Quantity availableAfter,
         Quantity reservedAfter,

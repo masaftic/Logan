@@ -1,3 +1,4 @@
+using BuildingBlocks.Common.ValueObjects;
 using Inventory.Api.Domain;
 using Inventory.Api.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -6,9 +7,9 @@ namespace Inventory.Api.Data.Extensions;
 
 public static class InventoryDbContextExtensions
 {
-    public static async Task<Dictionary<string, StockItem>> LockStockItemsForUpdateAsync(
+    public static async Task<Dictionary<Sku, StockItem>> LockStockItemsForUpdateAsync(
         this InventoryDbContext dbContext,
-        IReadOnlyList<string> skus,
+        IReadOnlyList<Sku> skus,
         CancellationToken ct = default)
     {
         if (skus.Count == 0)
@@ -18,6 +19,7 @@ public static class InventoryDbContextExtensions
 
         string[] sortedSkus = skus
             .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
+            .Select(s => (string)s)
             .ToArray();
 
         var stockItems = await dbContext.StockItems

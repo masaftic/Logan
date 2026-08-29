@@ -1,5 +1,5 @@
 using BuildingBlocks.Common.Results;
-using Inventory.Api.Domain.ValueObjects;
+using BuildingBlocks.Common.ValueObjects;
 using Inventory.Api.Data;
 using Inventory.Api.Data.Extensions;
 using Inventory.Api.Domain;
@@ -33,13 +33,13 @@ public class ReserveStockHandler
         }
 
         List<StockReservationItemDto> normalizedItems = [.. command.Items];
-        List<string> skus = [.. normalizedItems.Select(i => i.Sku.Trim().ToUpperInvariant())];
+        List<Sku> skus = [.. normalizedItems.Select(i => Sku.Create(i.Sku))];
 
-        Dictionary<string, StockItem> stockItems = await dbContext.LockStockItemsForUpdateAsync(skus, ct);
+        Dictionary<Sku, StockItem> stockItems = await dbContext.LockStockItemsForUpdateAsync(skus, ct);
 
         foreach (var item in normalizedItems)
         {
-            var sku = item.Sku.Trim().ToUpperInvariant();
+            var sku = Sku.Create(item.Sku);
             var requestedQty = PositiveQuantity.Create(item.Quantity);
 
             if (!stockItems.TryGetValue(sku, out var stockItem) || !stockItem.CanReserve(requestedQty))
@@ -58,7 +58,7 @@ public class ReserveStockHandler
 
         foreach (var item in normalizedItems)
         {
-            var sku = item.Sku.Trim().ToUpperInvariant();
+            var sku = Sku.Create(item.Sku);
             var requestedQty = PositiveQuantity.Create(item.Quantity);
             var stockItem = stockItems[sku];
 
