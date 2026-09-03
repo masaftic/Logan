@@ -19,4 +19,8 @@
     <Project Path="src/Services/Inventory/Inventory.Contracts/Inventory.Contracts.csproj" />
     <Project Path="src/Services/Inventory/Inventory.Api/Inventory.Api.csproj" />
   </Folder>
+  <Folder Name="/Services/Payment/">
+    <Project Path="src/Services/Payment/Payment.Contracts/Payment.Contracts.csproj" />
+    <Project Path="src/Services/Payment/Payment.Api/Payment.Api.csproj" />
+  </Folder>
 </Solution>

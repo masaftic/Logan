@@ -20,7 +20,7 @@ public static class SubmitOrderEndpoint
             CancellationToken ct) =>
         {
             var result = await bus.InvokeAsync<Result<OrderDto>>(command, ct);
-            return result.ToCreatedResult($"/api/orders/{result.Value?.Id}");
+            return result.ToCreatedResult(res => $"/api/orders/{res.Id}");
         })
         .WithName("SubmitOrder")
         .WithSummary("Submit a new order")

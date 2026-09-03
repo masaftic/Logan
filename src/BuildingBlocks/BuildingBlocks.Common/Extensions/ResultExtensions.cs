@@ -38,11 +38,11 @@ public static class ResultExtensions
         return ToProblemDetails(result.FirstError);
     }
 
-    public static IResult ToCreatedResult<T>(this Result<T> result, string uri)
+    public static IResult ToCreatedResult<T>(this Result<T> result, Func<T, string> uri)
     {
         if (result.IsSuccess)
         {
-            return HttpResults.Created(uri, result.Value);
+            return HttpResults.Created(uri(result.Value), result.Value);
         }
 
         return ToProblemDetails(result.FirstError);

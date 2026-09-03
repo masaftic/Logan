@@ -24,6 +24,16 @@ builder.Services.AddOpenApi(options =>
 {
     options.AddSchemaTransformer((schema, context, cancellationToken) =>
     {
+        if (context.JsonTypeInfo.Type == typeof(Guid))
+        {
+            schema.Example = JsonValue.Create(Guid.NewGuid().ToString());
+        }
+
+        return Task.CompletedTask;
+    });
+
+    options.AddSchemaTransformer((schema, context, cancellationToken) =>
+    {
         if (context.JsonTypeInfo.Type.IsEnum)
         {
             schema.Type = JsonSchemaType.String;
@@ -44,7 +54,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddPostgresDbContext<InventoryDbContext>(builder.Configuration, schemaName: InventoryDbContext.SchemaName);
 
 builder.Host.AddMessaging(
-    builder.Configuration, 
+    builder.Configuration,
     applicationAssembly: typeof(Program).Assembly,
     schemaName: InventoryDbContext.SchemaName);
 

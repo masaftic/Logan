@@ -15,11 +15,11 @@ public static class CancelOrderEndpoint
     {
         app.MapPost("/api/orders/{id:guid}/cancel", async (
             Guid id,
-            [FromBody] CancelOrderRequest request,
+            [FromBody] CancelOrderCommand command,
             IMessageBus bus,
             CancellationToken ct) =>
         {
-            var command = new CancelOrderCommand(id, request.Reason);
+            command = command with { OrderId = id };
             var result = await bus.InvokeAsync<Result>(command, ct);
             return result.ToHttpResult();
         })
@@ -32,5 +32,3 @@ public static class CancelOrderEndpoint
         .ProducesProblem(StatusCodes.Status409Conflict);
     }
 }
-
-public record CancelOrderRequest(string Reason);
