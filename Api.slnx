@@ -23,4 +23,8 @@
     <Project Path="src/Services/Payment/Payment.Contracts/Payment.Contracts.csproj" />
     <Project Path="src/Services/Payment/Payment.Api/Payment.Api.csproj" />
   </Folder>
+  <Folder Name="/Services/Shipping/">
+    <Project Path="src/Services/Shipping/Shipping.Contracts/Shipping.Contracts.csproj" />
+    <Project Path="src/Services/Shipping/Shipping.Api/Shipping.Api.csproj" />
+  </Folder>
 </Solution>
