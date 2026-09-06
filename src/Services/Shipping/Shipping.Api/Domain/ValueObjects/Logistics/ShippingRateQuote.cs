@@ -10,6 +10,7 @@ public partial class ShippingRateQuote
     public CarrierCode Carrier { get; }
     public string Service { get; }
     public Price Price { get; }
+    public CurrencyCode Currency { get; }
     public int? EstDeliveryDays { get; }
 
     static partial void ValidateFactoryArguments(
@@ -18,6 +19,7 @@ public partial class ShippingRateQuote
         ref CarrierCode carrier,
         ref string service,
         ref Price price,
+        ref CurrencyCode currency,
         ref int? estDeliveryDays)
     {
         if (string.IsNullOrWhiteSpace(providerRateId))

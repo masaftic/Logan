@@ -9,6 +9,13 @@ public partial class PackageDimensions
     public Length Width { get; }
     public Length Height { get; }
 
+    private PackageDimensions()
+    {
+        Length = default!;
+        Width = default!;
+        Height = default!;
+    }
+
     static partial void ValidateFactoryArguments(
         ref ValidationError? validationError,
         ref Length length,
@@ -32,7 +39,11 @@ public partial class PackageDimensions
 
     public PackageDimensions To(LengthUnit targetUnit)
     {
-        return Create(Length.To(targetUnit), Width.To(targetUnit), Height.To(targetUnit));
+        return Create(
+            Length.To(targetUnit), 
+            Width.To(targetUnit), 
+            Height.To(targetUnit)
+        );
     }
 
     public decimal VolumeInCubicCentimeters =>

@@ -5,8 +5,8 @@ namespace Shipping.Api.Domain.ValueObjects;
 [ComplexValueObject(DefaultStringComparison = StringComparison.OrdinalIgnoreCase)]
 public partial class Address
 {
-    public Street Street { get; }
-    public string? SecondaryStreet { get; }
+    public Street Street1 { get; }
+    public Street? Street2 { get; }
     public City City { get; }
     public StateOrProvince State { get; }
     public PostalCode PostalCode { get; }
@@ -14,8 +14,8 @@ public partial class Address
 
     static partial void ValidateFactoryArguments(
         ref ValidationError? validationError,
-        ref Street street,
-        ref string? secondaryStreet,
+        ref Street street1,
+        ref Street? street2,
         ref City city,
         ref StateOrProvince state,
         ref PostalCode postalCode,

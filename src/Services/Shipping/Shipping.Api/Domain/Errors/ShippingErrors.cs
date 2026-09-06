@@ -36,10 +36,10 @@ public static class ShippingErrors
             code: "Shipping.EmptyItems",
             description: "A shipment must contain at least one item.");
 
-    public static Error EasyPostError(string message) =>
+    public static Error ShippoError(string message) =>
         Error.ExternalService(
-            code: "Shipping.EasyPostError",
-            description: $"EasyPost shipping provider error: {message}");
+            code: "Shipping.ShippoError",
+            description: $"Shippo shipping provider error: {message}");
 
     public static Error AddressVerificationFailed(string details) =>
         Error.Validation(
