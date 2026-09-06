@@ -10,6 +10,7 @@
   </Folder>
   <Folder Name="/Host/">
     <Project Path="src/Host/ApiGateway/ApiGateway.csproj" />
+    <Project Path="src/Host/Logan.AppHost/Logan.AppHost.csproj" />
   </Folder>
   <Folder Name="/Services/Ordering/">
     <Project Path="src/Services/Ordering/Ordering.Contracts/Ordering.Contracts.csproj" />
