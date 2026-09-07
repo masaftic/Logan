@@ -10,6 +10,8 @@ using Shipping.Api.Services;
 using Shipping.Contracts.Commands;
 using Shipping.Contracts.DTOs;
 using Shipping.Contracts.Enums;
+using Shipping.Contracts.Events;
+using Wolverine;
 
 namespace Shipping.Api.Features.CreateShipment;
 
@@ -18,15 +20,18 @@ public class CreateShipmentHandler
     private readonly ShippingDbContext _dbContext;
     private readonly IShippingGateway _shippingGateway;
     private readonly WarehouseOptions _warehouseOptions;
+    private readonly IMessageBus _bus;
 
     public CreateShipmentHandler(
         ShippingDbContext dbContext,
         IShippingGateway shippingGateway,
-        IOptions<WarehouseOptions> warehouseOptions)
+        IOptions<WarehouseOptions> warehouseOptions,
+        IMessageBus bus)
     {
         _dbContext = dbContext;
         _shippingGateway = shippingGateway;
         _warehouseOptions = warehouseOptions.Value;
+        _bus = bus;
     }
 
     public async Task<Result<ShipmentDto>> Handle(
@@ -138,6 +143,14 @@ public class CreateShipmentHandler
 
         _dbContext.Shipments.Add(shipment);
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        await _bus.PublishAsync(new ShipmentLabelPurchasedEvent(
+            ShipmentId: shipment.Id,
+            OrderId: shipment.OrderId,
+            TrackingNumber: shipment.TrackingNumber!,
+            Carrier: shipment.SelectedRate?.Carrier ?? "UNKNOWN",
+            LabelUrl: shipment.LabelUrl!,
+            DispatchedAtUtc: shipment.DispatchedAtUtc ?? DateTime.UtcNow));
 
         return MapToDto(shipment);
     }

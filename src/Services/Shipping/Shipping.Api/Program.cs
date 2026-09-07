@@ -9,6 +9,9 @@ using Shippo;
 using Shipping.Api.Data;
 using Shipping.Api.Features.CreateShipment;
 using Shipping.Api.Features.EstimateShippingRates;
+using Shipping.Api.Features.GetShipmentById;
+using Shipping.Api.Features.GetShipmentByOrderId;
+using Shipping.Api.Features.ShippoWebhook;
 using Shipping.Api.Services;
 using System.Text.Json.Nodes;
 using Microsoft.OpenApi;
@@ -85,6 +88,9 @@ app.MapGet("/", () => Results.Ok(new
 
 app.MapEstimateShippingRatesEndpoint();
 app.MapCreateShipmentEndpoint();
+app.MapGetShipmentByIdEndpoint();
+app.MapGetShipmentByOrderIdEndpoint();
+app.MapShippoWebhookEndpoint();
 
 await app.ApplyMigrationsAsync<ShippingDbContext>();
 

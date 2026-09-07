@@ -173,7 +173,7 @@ public class Shipment
 
         switch (status.ToLowerInvariant())
         {
-            case "in_transit":
+            case "in_transit" or "transit":
                 MarkInTransit(occurredAtUtc);
                 break;
             case "out_for_delivery":
@@ -182,7 +182,7 @@ public class Shipment
             case "delivered":
                 MarkDelivered(occurredAtUtc);
                 break;
-            case "failure" or "return_to_sender":
+            case "failure" or "return_to_sender" or "returned":
                 MarkDeliveryFailed(message);
                 break;
         }
