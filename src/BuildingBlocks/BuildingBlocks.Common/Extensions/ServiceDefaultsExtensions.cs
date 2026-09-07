@@ -10,6 +10,12 @@ public static class ServiceDefaultsExtensions
     public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
     {
         builder.Services.AddHealthChecks();
+
+        builder.Services.ConfigureHttpClientDefaults(http =>
+        {
+            http.AddStandardResilienceHandler();
+        });
+
         return builder;
     }
 
