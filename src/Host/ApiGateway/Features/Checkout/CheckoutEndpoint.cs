@@ -1,3 +1,4 @@
+using BuildingBlocks.Common.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,12 +20,19 @@ public static class CheckoutEndpoint
             IPaymentClient paymentClient,
             CancellationToken ct) =>
         {
-            var submitOrderCommand = new SubmitOrderCommand(request.CustomerId, request.Items);
+            var submitOrderCommand = new SubmitOrderCommand(
+                request.CustomerId,
+                request.Items,
+                request.Currency,
+                request.ProviderRateId,
+                request.DestinationAddress,
+                request.Dimensions,
+                request.Weight);
             var orderResult = await orderingClient.SubmitOrderAsync(submitOrderCommand, ct);
 
             if (orderResult.IsError)
             {
-                return Results.BadRequest(new { Error = orderResult.FirstError.Description });
+                return orderResult.ToHttpResult();
             }
 
             var order = orderResult.Value;

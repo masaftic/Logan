@@ -12,6 +12,7 @@ public class Order
     public Guid CustomerId { get; private set; }
     public OrderStatus Status { get; private set; }
     public Price TotalAmount { get; private set; }
+    public CurrencyCode Currency { get; private set; } = null!;
     public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
     public DateTime CreatedAtUtc { get; private set; }
     public DateTime? CompletedAtUtc { get; private set; }
@@ -20,7 +21,7 @@ public class Order
 
     private Order() { }
 
-    public static Order Create(Guid id, Guid customerId, IReadOnlyList<OrderItem> items)
+    public static Order Create(Guid id, Guid customerId, CurrencyCode currency, IReadOnlyList<OrderItem> items)
     {
         if (items.Count == 0)
             throw new ArgumentException("Order must have at least one item.", nameof(items));
@@ -29,6 +30,7 @@ public class Order
         {
             Id = id,
             CustomerId = customerId,
+            Currency = currency,
             Status = OrderStatus.Submitted,
             CreatedAtUtc = DateTime.UtcNow,
             TotalAmount = (Price)items.Sum(i => i.TotalPrice)

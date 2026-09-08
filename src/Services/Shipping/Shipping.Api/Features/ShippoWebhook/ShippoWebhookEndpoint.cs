@@ -1,4 +1,6 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using BuildingBlocks.Common.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -26,20 +28,23 @@ public static class ShippoWebhookEndpoint
                 return Results.Unauthorized();
             }
 
-            var trackingNumber = payload.Data?.TrackingNumber ?? payload.TrackingNumber;
-            var trackingStatus = payload.Data?.TrackingStatus ?? payload.TrackingStatus;
+            if (!string.Equals(payload.Event, "track_updated", StringComparison.OrdinalIgnoreCase))
+            {
+                return Results.Ok();
+            }
 
-            if (string.IsNullOrWhiteSpace(trackingNumber) || trackingStatus?.Status is null)
+            var trackingInfo = payload.ExtractTrackingInfo();
+            if (trackingInfo is null)
             {
                 return Results.Ok();
             }
 
             var command = new CommandProcessShippoWebhook(
-                TrackingNumber: trackingNumber,
-                Status: trackingStatus.Status,
-                Message: trackingStatus.StatusDetails ?? trackingStatus.Status,
-                Location: trackingStatus.Location?.Format(),
-                OccurredAtUtc: trackingStatus.StatusDate ?? DateTime.UtcNow);
+                TrackingNumber: trackingInfo.Value.TrackingNumber,
+                Status: trackingInfo.Value.Status,
+                Message: trackingInfo.Value.Message,
+                Location: trackingInfo.Value.Location,
+                OccurredAtUtc: trackingInfo.Value.OccurredAtUtc);
 
             await bus.InvokeAsync(command, ct);
 
@@ -49,31 +54,94 @@ public static class ShippoWebhookEndpoint
         .WithSummary("Handle incoming Shippo tracking webhooks with token verification")
         .WithTags("Shipping")
         .Produces(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status401Unauthorized);
+        .Produces(StatusCodes.Status401Unauthorized)
+        .LogRequestShape();
     }
 }
 
 public record ShippoWebhookPayload(
     string? Event,
-    ShippoTrackingData? Data,
+    JsonElement? Data,
     [property: JsonPropertyName("tracking_number")] string? TrackingNumber,
-    [property: JsonPropertyName("tracking_status")] ShippoTrackingStatus? TrackingStatus);
+    [property: JsonPropertyName("tracking_status")] JsonElement? TrackingStatus)
+{
+    public (string TrackingNumber, string Status, string Message, string? Location, DateTime OccurredAtUtc)? ExtractTrackingInfo()
+    {
+        string? trackingNumber = TrackingNumber;
+        string? status = null;
+        string? statusDetails = null;
+        DateTime? statusDate = null;
+        string? location = null;
 
-public record ShippoTrackingData(
-    [property: JsonPropertyName("tracking_number")] string? TrackingNumber,
-    [property: JsonPropertyName("tracking_status")] ShippoTrackingStatus? TrackingStatus);
+        if (Data.HasValue && Data.Value.ValueKind == JsonValueKind.Object)
+        {
+            if (Data.Value.TryGetProperty("tracking_number", out var numProp) && numProp.ValueKind == JsonValueKind.String)
+            {
+                trackingNumber ??= numProp.GetString();
+            }
+
+            if (Data.Value.TryGetProperty("tracking_status", out var statusProp))
+            {
+                ParseStatus(statusProp, ref status, ref statusDetails, ref statusDate, ref location);
+            }
+        }
+
+        if (TrackingStatus.HasValue)
+        {
+            ParseStatus(TrackingStatus.Value, ref status, ref statusDetails, ref statusDate, ref location);
+        }
+
+        if (string.IsNullOrWhiteSpace(trackingNumber) || string.IsNullOrWhiteSpace(status))
+        {
+            return null;
+        }
+
+        return (
+            trackingNumber,
+            status,
+            statusDetails ?? status,
+            location,
+            statusDate ?? DateTime.UtcNow
+        );
+    }
+
+    private static void ParseStatus(
+        JsonElement element,
+        ref string? status,
+        ref string? statusDetails,
+        ref DateTime? statusDate,
+        ref string? location)
+    {
+        if (element.ValueKind == JsonValueKind.String)
+        {
+            status ??= element.GetString();
+            statusDetails ??= status;
+        }
+        else if (element.ValueKind == JsonValueKind.Object)
+        {
+            var parsed = element.Deserialize<ShippoTrackingStatus>();
+            if (parsed is not null)
+            {
+                status ??= parsed.Status;
+                statusDetails ??= parsed.StatusDetails ?? parsed.Status;
+                statusDate ??= parsed.StatusDate;
+                location ??= parsed.Location?.Format();
+            }
+        }
+    }
+}
 
 public record ShippoTrackingStatus(
-    string? Status,
+    [property: JsonPropertyName("status")] string? Status,
     [property: JsonPropertyName("status_details")] string? StatusDetails,
     [property: JsonPropertyName("status_date")] DateTime? StatusDate,
-    ShippoTrackingLocation? Location);
+    [property: JsonPropertyName("location")] ShippoTrackingLocation? Location);
 
 public record ShippoTrackingLocation(
-    string? City,
-    string? State,
-    string? Zip,
-    string? Country)
+    [property: JsonPropertyName("city")] string? City,
+    [property: JsonPropertyName("state")] string? State,
+    [property: JsonPropertyName("zip")] string? Zip,
+    [property: JsonPropertyName("country")] string? Country)
 {
     public string? Format()
     {

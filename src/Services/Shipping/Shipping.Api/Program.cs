@@ -71,6 +71,7 @@ builder.Host.AddMessaging(
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+app.UseRequestShapeLogging();
 
 if (app.Environment.IsDevelopment())
 {

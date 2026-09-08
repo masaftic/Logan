@@ -7,7 +7,10 @@ using JasperFx;
 using Microsoft.OpenApi;
 using Ordering.Api.Data;
 using Ordering.Api.Features.CancelOrder;
+using Ordering.Api.Features.GetOrderById;
+using Ordering.Api.Features.GetOrderSummary;
 using Ordering.Api.Features.SubmitOrder;
+using Ordering.Api.Services;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +47,12 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 builder.Services.AddProblemDetails();
 
+var inventoryUrl = builder.Configuration["Services:Inventory"] ?? "http://localhost:5002";
+builder.Services.AddHttpClient<IInventoryClient, InventoryClient>(client =>
+{
+    client.BaseAddress = new Uri(inventoryUrl);
+});
+
 builder.Services.AddPostgresDbContext<OrderDbContext>(builder.Configuration, schemaName: OrderDbContext.SchemaName);
 
 builder.Host.AddMessaging(
@@ -71,6 +80,8 @@ app.MapGet("/", () => Results.Ok(new
 
 app.MapSubmitOrderEndpoint();
 app.MapCancelOrderEndpoint();
+app.MapGetOrderByIdEndpoint();
+app.MapGetOrderSummaryEndpoint();
 
 await app.ApplyMigrationsAsync<OrderDbContext>();
 

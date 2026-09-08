@@ -26,6 +26,7 @@ public static class SubmitOrderEndpoint
         .WithSummary("Submit a new order")
         .WithTags("Orders")
         .Produces<OrderDto>(StatusCodes.Status201Created)
-        .ProducesProblem(StatusCodes.Status400BadRequest);
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status409Conflict);
     }
 }

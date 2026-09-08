@@ -2,11 +2,13 @@ using Aspire.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var ordering = builder.AddProject<Projects.Ordering_Api>("ordering-api")
-    .WithHttpEndpoint(port: 5001, name: "http");
-
 var inventory = builder.AddProject<Projects.Inventory_Api>("inventory-api")
     .WithHttpEndpoint(port: 5002, name: "http");
+
+var ordering = builder.AddProject<Projects.Ordering_Api>("ordering-api")
+    .WithHttpEndpoint(port: 5001, name: "http")
+    .WithReference(inventory)
+    .WaitFor(inventory);
 
 var payment = builder.AddProject<Projects.Payment_Api>("payment-api")
     .WithHttpEndpoint(port: 5003, name: "http");

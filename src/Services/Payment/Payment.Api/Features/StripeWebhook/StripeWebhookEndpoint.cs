@@ -1,3 +1,4 @@
+using BuildingBlocks.Common.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -88,7 +89,8 @@ public static class StripeWebhookEndpoint
         .WithSummary("Handle incoming Stripe webhooks")
         .WithTags("Payments")
         .Produces(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest);
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .LogRequestShape();
     }
 
     private static async Task<Domain.PaymentRecord?> FindPaymentRecordAsync(

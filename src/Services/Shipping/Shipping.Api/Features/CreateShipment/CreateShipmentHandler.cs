@@ -98,6 +98,7 @@ public class CreateShipmentHandler
         var rateResult = await _shippingGateway.GetRateByIdAsync(command.ProviderRateId, cancellationToken);
         if (rateResult.IsError)
         {
+            await _bus.PublishAsync(new ShipmentCreationFailedEvent(command.OrderId, rateResult.FirstError.Description, DateTime.UtcNow));
             return rateResult.Errors;
         }
 
@@ -114,6 +115,7 @@ public class CreateShipmentHandler
 
         if (draftResult.IsError)
         {
+            await _bus.PublishAsync(new ShipmentCreationFailedEvent(command.OrderId, draftResult.FirstError.Description, DateTime.UtcNow));
             return draftResult.Errors;
         }
 
@@ -125,6 +127,7 @@ public class CreateShipmentHandler
 
         if (labelResult.IsError)
         {
+            await _bus.PublishAsync(new ShipmentCreationFailedEvent(command.OrderId, labelResult.FirstError.Description, DateTime.UtcNow));
             return labelResult.Errors;
         }
 
@@ -138,6 +141,7 @@ public class CreateShipmentHandler
 
         if (purchaseResult.IsError)
         {
+            await _bus.PublishAsync(new ShipmentCreationFailedEvent(command.OrderId, purchaseResult.FirstError.Description, DateTime.UtcNow));
             return purchaseResult.Errors;
         }
 
