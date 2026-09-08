@@ -1,7 +1,7 @@
 using System.Numerics;
 using Thinktecture;
 
-namespace Shipping.Api.Domain.ValueObjects;
+namespace BuildingBlocks.Common.ValueObjects;
 
 [ComplexValueObject]
 public partial class Weight :

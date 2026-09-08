@@ -1,6 +1,6 @@
 using Thinktecture;
 
-namespace Shipping.Api.Domain.ValueObjects;
+namespace BuildingBlocks.Common.ValueObjects;
 
 [SmartEnum<string>]
 public partial class LengthUnit

@@ -1,4 +1,5 @@
 using BuildingBlocks.Common.Results;
+using BuildingBlocks.Common.ValueObjects;
 using Shipping.Api.Domain.ValueObjects;
 
 namespace Shipping.Api.Services;

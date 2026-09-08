@@ -14,6 +14,7 @@
     <ProjectReference Include="..\..\Services\Inventory\Inventory.Api\Inventory.Api.csproj" />
     <ProjectReference Include="..\..\Services\Payment\Payment.Api\Payment.Api.csproj" />
     <ProjectReference Include="..\..\Services\Shipping\Shipping.Api\Shipping.Api.csproj" />
+    <ProjectReference Include="..\..\Services\Catalog\Catalog.Api\Catalog.Api.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
 using BuildingBlocks.Common.Results;
+using BuildingBlocks.Common.ValueObjects;
 using Shipping.Api.Domain.Enums;
 using Shipping.Api.Domain.Errors;
 using Shipping.Api.Domain.ValueObjects;

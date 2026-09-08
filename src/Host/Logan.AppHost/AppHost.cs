@@ -16,11 +16,15 @@ var payment = builder.AddProject<Projects.Payment_Api>("payment-api")
 var shipping = builder.AddProject<Projects.Shipping_Api>("shipping-api")
     .WithHttpEndpoint(port: 5004, name: "http");
 
+var catalog = builder.AddProject<Projects.Catalog_Api>("catalog-api")
+    .WithHttpEndpoint(port: 5005, name: "http");
+
 var apiGateway = builder.AddProject<Projects.ApiGateway>("api-gateway")
     .WithHttpEndpoint(port: 5000, name: "http")
     .WaitFor(ordering)
     .WaitFor(inventory)
     .WaitFor(payment)
-    .WaitFor(shipping);
+    .WaitFor(shipping)
+    .WaitFor(catalog);
 
 builder.Build().Run();
