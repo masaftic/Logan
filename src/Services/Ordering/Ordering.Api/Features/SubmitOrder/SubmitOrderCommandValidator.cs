@@ -24,10 +24,6 @@ public class SubmitOrderCommandValidator : AbstractValidator<SubmitOrderCommand>
             item.RuleFor(i => i.Quantity)
                 .GreaterThan(0)
                 .WithMessage("Quantity must be greater than zero.");
-
-            item.RuleFor(i => i.UnitPrice)
-                .GreaterThanOrEqualTo(0)
-                .WithMessage("UnitPrice cannot be negative.");
         });
 
         RuleFor(x => x.Currency)
@@ -50,28 +46,6 @@ public class SubmitOrderCommandValidator : AbstractValidator<SubmitOrderCommand>
             RuleFor(x => x.DestinationAddress.State).NotEmpty().WithMessage("State is required.");
             RuleFor(x => x.DestinationAddress.PostalCode).NotEmpty().WithMessage("PostalCode is required.");
             RuleFor(x => x.DestinationAddress.Country).NotEmpty().WithMessage("Country is required.");
-        });
-
-        RuleFor(x => x.Dimensions)
-            .NotNull()
-            .WithMessage("Dimensions are required.");
-
-        When(x => x.Dimensions is not null, () =>
-        {
-            RuleFor(x => x.Dimensions.Length).GreaterThan(0).WithMessage("Dimensions Length must be greater than zero.");
-            RuleFor(x => x.Dimensions.Width).GreaterThan(0).WithMessage("Dimensions Width must be greater than zero.");
-            RuleFor(x => x.Dimensions.Height).GreaterThan(0).WithMessage("Dimensions Height must be greater than zero.");
-            RuleFor(x => x.Dimensions.Unit).NotEmpty().WithMessage("Dimensions Unit is required.");
-        });
-
-        RuleFor(x => x.Weight)
-            .NotNull()
-            .WithMessage("Weight is required.");
-
-        When(x => x.Weight is not null, () =>
-        {
-            RuleFor(x => x.Weight.Value).GreaterThan(0).WithMessage("Weight Value must be greater than zero.");
-            RuleFor(x => x.Weight.Unit).NotEmpty().WithMessage("Weight Unit is required.");
         });
     }
 }

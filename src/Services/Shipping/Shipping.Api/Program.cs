@@ -13,6 +13,8 @@ using Shipping.Api.Features.GetShipmentById;
 using Shipping.Api.Features.GetShipmentByOrderId;
 using Shipping.Api.Features.ShippoWebhook;
 using Shipping.Api.Services;
+using Shipping.Api.Services.Clients;
+using Shipping.Api.Services.Packaging;
 using System.Text.Json.Nodes;
 using Microsoft.OpenApi;
 
@@ -61,16 +63,29 @@ builder.Services.AddSingleton(sp =>
 
 builder.Services.AddScoped<IShippingGateway, ShippoShippingGateway>();
 
+var catalogUrl = builder.Configuration["Services:Catalog"] ?? "http://localhost:5005";
+builder.Services.AddHttpClient<ICatalogClient, CatalogClient>(client =>
+{
+    client.BaseAddress = new Uri(catalogUrl);
+});
+
+builder.Services.AddScoped<IPackagingStrategy, CatalogPackagingStrategy>();
+
 builder.Services.AddPostgresDbContext<ShippingDbContext>(builder.Configuration, schemaName: ShippingDbContext.SchemaName);
 
 builder.Host.AddMessaging(
     builder.Configuration,
     applicationAssembly: typeof(Program).Assembly,
-    schemaName: ShippingDbContext.SchemaName);
+    schemaName: ShippingDbContext.SchemaName,
+    configure: opts =>
+    {
+        opts.CodeGeneration.AlwaysUseServiceLocationFor<ICatalogClient>();
+    });
 
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+app.UseValidationExceptionHandler();
 app.UseRequestShapeLogging();
 
 if (app.Environment.IsDevelopment())

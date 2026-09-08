@@ -39,44 +39,6 @@ public class CreateShipmentCommandValidator : AbstractValidator<CommandCreateShi
                 .WithMessage("Country must be a 2-letter ISO country code.");
         });
 
-        RuleFor(x => x.Dimensions)
-            .NotNull()
-            .WithMessage("Dimensions are required.");
-
-        When(x => x.Dimensions is not null, () =>
-        {
-            RuleFor(x => x.Dimensions.Length)
-                .GreaterThan(0)
-                .WithMessage("Length must be greater than zero.");
-
-            RuleFor(x => x.Dimensions.Width)
-                .GreaterThan(0)
-                .WithMessage("Width must be greater than zero.");
-
-            RuleFor(x => x.Dimensions.Height)
-                .GreaterThan(0)
-                .WithMessage("Height must be greater than zero.");
-
-            RuleFor(x => x.Dimensions.Unit)
-                .NotEmpty()
-                .WithMessage("Dimension unit is required.");
-        });
-
-        RuleFor(x => x.Weight)
-            .NotNull()
-            .WithMessage("Weight is required.");
-
-        When(x => x.Weight is not null, () =>
-        {
-            RuleFor(x => x.Weight.Value)
-                .GreaterThan(0)
-                .WithMessage("Weight value must be greater than zero.");
-
-            RuleFor(x => x.Weight.Unit)
-                .NotEmpty()
-                .WithMessage("Weight unit is required.");
-        });
-
         RuleFor(x => x.ProviderRateId)
             .NotEmpty()
             .WithMessage("ProviderRateId is required.");

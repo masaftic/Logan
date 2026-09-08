@@ -8,6 +8,7 @@ using Payment.Api.Data;
 using Payment.Api.Data.Extensions;
 using Payment.Api.Domain.Errors;
 using Payment.Api.Services;
+using Wolverine;
 
 namespace Payment.Api.Features.TestConfirm;
 
@@ -20,6 +21,7 @@ public static class TestConfirmEndpoint
             [FromBody] TestConfirmRequest? request,
             PaymentDbContext dbContext,
             IStripePaymentGateway stripeGateway,
+            IMessageBus bus,
             CancellationToken ct) =>
         {
             var payment = await dbContext.Payments
@@ -42,7 +44,31 @@ public static class TestConfirmEndpoint
 
             if (result.IsError)
             {
+                payment.MarkFailed(result.FirstError.Description);
+                await dbContext.SaveChangesAsync(ct);
+
+                await bus.PublishAsync(new Payment.Contracts.Events.PaymentFailedEvent(
+                    payment.OrderId,
+                    "card_declined",
+                    result.FirstError.Description,
+                    DateTime.UtcNow
+                ));
+
                 return Results.BadRequest(new { Error = result.FirstError.Description });
+            }
+
+            if (string.Equals(result.Value, "succeeded", StringComparison.OrdinalIgnoreCase) && payment.Status != Payment.Api.Domain.Enums.PaymentStatus.Succeeded)
+            {
+                payment.MarkSucceeded(DateTime.UtcNow);
+                await dbContext.SaveChangesAsync(ct);
+
+                await bus.PublishAsync(new Payment.Contracts.Events.PaymentCompletedEvent(
+                    payment.OrderId,
+                    payment.PaymentIntentId,
+                    payment.Amount,
+                    payment.Currency,
+                    payment.CompletedAtUtc ?? DateTime.UtcNow
+                ));
             }
 
             return Results.Ok(new TestConfirmResponse(

@@ -6,7 +6,5 @@ public record CommandCreateShipment(
     Guid OrderId,
     string ProviderRateId,
     ShippingAddressDto DestinationAddress,
-    PackageDimensionsDto Dimensions,
-    PackageWeightDto Weight,
     IReadOnlyList<ShipmentItemDto> Items);
 

@@ -11,8 +11,6 @@ public record OrderSubmittedEvent(
     IReadOnlyList<OrderItemDto> Items,
     DateTime CreatedAtUtc,
     string ProviderRateId,
-    ShippingAddressDto DestinationAddress,
-    PackageDimensionsDto Dimensions,
-    PackageWeightDto Weight
+    ShippingAddressDto DestinationAddress
 );
 

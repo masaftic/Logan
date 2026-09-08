@@ -8,8 +8,6 @@ public record SubmitOrderCommand(
     IReadOnlyList<OrderItemRequestDto> Items,
     string Currency,
     string ProviderRateId,
-    ShippingAddressDto DestinationAddress,
-    PackageDimensionsDto Dimensions,
-    PackageWeightDto Weight
+    ShippingAddressDto DestinationAddress
 );
 

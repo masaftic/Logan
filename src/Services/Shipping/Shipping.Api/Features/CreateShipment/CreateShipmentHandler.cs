@@ -7,6 +7,7 @@ using Shipping.Api.Data.Extensions;
 using Shipping.Api.Domain;
 using Shipping.Api.Domain.ValueObjects;
 using Shipping.Api.Services;
+using Shipping.Api.Services.Packaging;
 using Shipping.Contracts.Commands;
 using Shipping.Contracts.DTOs;
 using Shipping.Contracts.Enums;
@@ -21,17 +22,20 @@ public class CreateShipmentHandler
     private readonly IShippingGateway _shippingGateway;
     private readonly WarehouseOptions _warehouseOptions;
     private readonly IMessageBus _bus;
+    private readonly IPackagingStrategy _packagingStrategy;
 
     public CreateShipmentHandler(
         ShippingDbContext dbContext,
         IShippingGateway shippingGateway,
         IOptions<WarehouseOptions> warehouseOptions,
-        IMessageBus bus)
+        IMessageBus bus,
+        IPackagingStrategy packagingStrategy)
     {
         _dbContext = dbContext;
         _shippingGateway = shippingGateway;
         _warehouseOptions = warehouseOptions.Value;
         _bus = bus;
+        _packagingStrategy = packagingStrategy;
     }
 
     public async Task<Result<ShipmentDto>> Handle(
@@ -69,22 +73,15 @@ public class CreateShipmentHandler
             PostalCode.Create(_warehouseOptions.Zip),
             CountryCode.US);
 
+        var packageResult = await _packagingStrategy.CalculatePackageAsync(command.Items, cancellationToken);
+        if (packageResult.IsError)
+        {
+            await _bus.PublishAsync(new ShipmentCreationFailedEvent(command.OrderId, packageResult.FirstError.Description, DateTime.UtcNow));
+            return packageResult.Errors;
+        }
 
-        var lengthUnit = LengthUnit.TryGet(command.Dimensions.Unit, out var lUnit)
-            ? lUnit
-            : LengthUnit.Centimeter;
-
-        var dimensions = PackageDimensions.Create(
-            command.Dimensions.Length,
-            command.Dimensions.Width,
-            command.Dimensions.Height,
-            lengthUnit);
-
-        var weightUnit = WeightUnit.TryGet(command.Weight.Unit, out var wUnit)
-            ? wUnit
-            : WeightUnit.Gram;
-
-        var weight = Weight.Create(command.Weight.Value, weightUnit);
+        var dimensions = packageResult.Value.Dimensions;
+        var weight = packageResult.Value.Weight;
 
         var shipmentId = ShipmentId.New();
         var domainItems = command.Items.Select(item =>

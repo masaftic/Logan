@@ -23,8 +23,6 @@ public class OrderSaga : Saga
 
     public string ProviderRateId { get; set; } = null!;
     public ShippingAddressDto DestinationAddress { get; set; } = null!;
-    public PackageDimensionsDto Dimensions { get; set; } = null!;
-    public PackageWeightDto Weight { get; set; } = null!;
     public List<ShipmentItemDto> ShipmentItems { get; set; } = [];
 
     public string? PaymentIntentId { get; set; }
@@ -56,8 +54,6 @@ public class OrderSaga : Saga
             Status = OrderSagaStatus.AwaitingPayment,
             ProviderRateId = @event.ProviderRateId,
             DestinationAddress = @event.DestinationAddress,
-            Dimensions = @event.Dimensions,
-            Weight = @event.Weight,
             ShipmentItems = shipmentItems,
             StartedAtUtc = @event.CreatedAtUtc
         };
@@ -91,14 +87,14 @@ public class OrderSaga : Saga
             orderSummary.UpdatePaymentStatus(PaymentStatus.Captured);
         }
 
+        await dbContext.SaveChangesAsync(ct);
+
         var confirmStock = new ConfirmStockDeductionCommand(Id);
 
         var createShipment = new CommandCreateShipment(
             OrderId: Id,
             ProviderRateId: ProviderRateId,
             DestinationAddress: DestinationAddress,
-            Dimensions: Dimensions,
-            Weight: Weight,
             Items: ShipmentItems);
 
         logger.LogInformation("Payment completed for Order {OrderId}. Dispatching stock confirmation and shipment label purchase concurrently.", Id);
@@ -128,6 +124,8 @@ public class OrderSaga : Saga
             orderSummary.MarkCompleted(CompletedAtUtc.Value);
         }
 
+        await dbContext.SaveChangesAsync(ct);
+
         logger.LogInformation("Order {OrderId} fulfilled and completed successfully. Carrier: {Carrier}, Tracking: {TrackingNumber}",
             Id, @event.Carrier, @event.TrackingNumber);
 
@@ -155,6 +153,8 @@ public class OrderSaga : Saga
             orderSummary.UpdatePaymentStatus(PaymentStatus.Failed);
             orderSummary.MarkCancelled(CancelledAtUtc.Value);
         }
+
+        await dbContext.SaveChangesAsync(ct);
 
         logger.LogWarning("Payment failed for Order {OrderId}. Triggering stock release compensation. Reason: {Reason}",
             Id, FailureReason);
@@ -184,6 +184,8 @@ public class OrderSaga : Saga
             orderSummary.UpdatePaymentStatus(PaymentStatus.Refunded);
             orderSummary.MarkCancelled(CancelledAtUtc.Value);
         }
+
+        await dbContext.SaveChangesAsync(ct);
 
         logger.LogWarning("Shipping failed for Order {OrderId} after payment. Triggering dual compensations (Refund + Stock Release). Reason: {Reason}",
             Id, FailureReason);
@@ -223,6 +225,8 @@ public class OrderSaga : Saga
             orderSummary.MarkCancelled(CancelledAtUtc.Value);
         }
 
+        await dbContext.SaveChangesAsync(ct);
+
         logger.LogWarning("Order {OrderId} timed out waiting for payment. Releasing reserved stock hold.", Id);
 
         MarkCompleted();
@@ -245,6 +249,9 @@ public class OrderSaga : Saga
         CancelledAtUtc = @event.CancelledAtUtc;
         Status = OrderSagaStatus.Failed;
 
+        var order = await dbContext.Orders.SingleOrDefaultAsync(o => o.Id == Id, ct);
+        order?.Cancel(FailureReason);
+
         var orderSummary = await dbContext.OrderSummaries.SingleOrDefaultAsync(s => s.OrderId == Id, ct);
         if (orderSummary is not null)
         {
@@ -254,6 +261,8 @@ public class OrderSaga : Saga
             }
             orderSummary.MarkCancelled(CancelledAtUtc.Value);
         }
+
+        await dbContext.SaveChangesAsync(ct);
 
         logger.LogInformation("Order {OrderId} cancelled while saga was active. Applying compensations.", Id);
 

@@ -36,6 +36,7 @@ builder.Host.AddMessaging(
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+app.UseValidationExceptionHandler();
 app.UseRequestShapeLogging();
 
 if (app.Environment.IsDevelopment())

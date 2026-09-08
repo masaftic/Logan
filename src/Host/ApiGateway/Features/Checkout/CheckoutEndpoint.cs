@@ -25,9 +25,7 @@ public static class CheckoutEndpoint
                 request.Items,
                 request.Currency,
                 request.ProviderRateId,
-                request.DestinationAddress,
-                request.Dimensions,
-                request.Weight);
+                request.DestinationAddress);
             var orderResult = await orderingClient.SubmitOrderAsync(submitOrderCommand, ct);
 
             if (orderResult.IsError)

@@ -89,8 +89,7 @@ public static class StripeWebhookEndpoint
         .WithSummary("Handle incoming Stripe webhooks")
         .WithTags("Payments")
         .Produces(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
-        .LogRequestShape();
+        .ProducesProblem(StatusCodes.Status400BadRequest);
     }
 
     private static async Task<Domain.PaymentRecord?> FindPaymentRecordAsync(

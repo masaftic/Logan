@@ -10,6 +10,7 @@ using Catalog.Api.Features.GetCategoryById;
 using Catalog.Api.Features.GetProducts;
 using Catalog.Api.Features.GetProductById;
 using Catalog.Api.Features.GetProductBySku;
+using Catalog.Api.Features.GetProductsBySkus;
 using JasperFx;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
@@ -59,6 +60,7 @@ builder.Host.AddMessaging(
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+app.UseValidationExceptionHandler();
 app.UseRequestShapeLogging();
 
 if (app.Environment.IsDevelopment())
@@ -80,6 +82,7 @@ app.MapGetCategoryByIdEndpoint();
 app.MapGetProductsEndpoint();
 app.MapGetProductByIdEndpoint();
 app.MapGetProductBySkuEndpoint();
+app.MapGetProductsBySkusEndpoint();
 
 await app.ApplyMigrationsAsync<CatalogDbContext>();
 await app.SeedCatalogAsync();

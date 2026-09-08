@@ -24,12 +24,15 @@ builder.Services.AddHttpClient<IPaymentClient, PaymentClient>(client =>
     client.BaseAddress = new Uri(paymentUrl);
 });
 
+builder.Services.AddProblemDetails();
+
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+app.UseValidationExceptionHandler();
 
 app.MapGet("/", () => Results.Ok(new
 {

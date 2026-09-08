@@ -1,4 +1,5 @@
 using System.Reflection;
+using JasperFx.CodeGeneration.Model;
 using JasperFx.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -26,6 +27,7 @@ public static class MessagingExtensions
             var dbConnectionString = configuration.GetConnectionString("Database")!;
 
             opts.ApplicationAssembly = applicationAssembly;
+            opts.ServiceLocationPolicy = ServiceLocationPolicy.AllowedButWarn;
 
             // RabbitMQ Transport with conventional routing for Commands and Events (excluding Queries, DTOs, and internal results)
             opts.UseRabbitMq(rabbitUri)

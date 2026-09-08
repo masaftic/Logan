@@ -4,6 +4,5 @@ namespace Shipping.Contracts.Queries;
 
 public record QueryShippingRates(
     ShippingAddressDto DestinationAddress,
-    PackageDimensionsDto Dimensions,
-    PackageWeightDto Weight);
+    IReadOnlyList<ShipmentItemDto> Items);
 

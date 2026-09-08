@@ -9,9 +9,7 @@ public record CheckoutRequest(
     IReadOnlyList<OrderItemRequestDto> Items,
     string Currency,
     string ProviderRateId,
-    ShippingAddressDto DestinationAddress,
-    PackageDimensionsDto Dimensions,
-    PackageWeightDto Weight
+    ShippingAddressDto DestinationAddress
 );
 
 public record CheckoutResponse(

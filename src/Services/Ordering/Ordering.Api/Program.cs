@@ -53,16 +53,29 @@ builder.Services.AddHttpClient<IInventoryClient, InventoryClient>(client =>
     client.BaseAddress = new Uri(inventoryUrl);
 });
 
+var catalogUrl = builder.Configuration["Services:Catalog"] ?? "http://localhost:5005";
+builder.Services.AddHttpClient<ICatalogClient, CatalogClient>(client =>
+{
+    client.BaseAddress = new Uri(catalogUrl);
+});
+
 builder.Services.AddPostgresDbContext<OrderDbContext>(builder.Configuration, schemaName: OrderDbContext.SchemaName);
 
 builder.Host.AddMessaging(
     builder.Configuration, 
     applicationAssembly: typeof(Program).Assembly,
-    schemaName: OrderDbContext.SchemaName);
+    schemaName: OrderDbContext.SchemaName,
+    configure: opts =>
+    {
+        opts.CodeGeneration.AlwaysUseServiceLocationFor<IInventoryClient>();
+        opts.CodeGeneration.AlwaysUseServiceLocationFor<ICatalogClient>();
+    });
 
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+app.UseValidationExceptionHandler();
+app.UseRequestShapeLogging();
 
 if (app.Environment.IsDevelopment())
 {

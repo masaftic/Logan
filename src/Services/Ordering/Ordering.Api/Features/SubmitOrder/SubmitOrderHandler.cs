@@ -21,10 +21,33 @@ public static class SubmitOrderHandler
         SubmitOrderCommand command,
         OrderDbContext dbContext,
         IInventoryClient inventoryClient,
+        ICatalogClient catalogClient,
         IMessageBus bus,
         CancellationToken ct)
     {
         var orderId = Guid.CreateVersion7();
+
+        var uniqueSkus = command.Items.Select(i => i.Sku.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var productsResult = await catalogClient.GetProductsBySkusAsync(uniqueSkus, ct);
+        if (productsResult.IsError)
+        {
+            return productsResult.Errors;
+        }
+
+        var productsBySku = productsResult.Value.ToDictionary(p => p.Sku, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var item in command.Items)
+        {
+            if (!productsBySku.TryGetValue(item.Sku.Trim(), out var product))
+            {
+                return Error.NotFound("Catalog.ProductNotFound", $"Product with SKU '{item.Sku}' was not found in catalog.");
+            }
+
+            if (!string.Equals(product.Currency, command.Currency, StringComparison.OrdinalIgnoreCase))
+            {
+                return Error.Validation("Catalog.CurrencyMismatch", $"Product '{item.Sku}' currency '{product.Currency}' does not match order currency '{command.Currency}'.");
+            }
+        }
 
         List<StockReservationItemDto> reservationItems = [.. command.Items.Select(
             i => new StockReservationItemDto(i.Sku, i.Quantity))];
@@ -41,7 +64,7 @@ public static class SubmitOrderHandler
             i => OrderItem.Create(
                     Sku.Create(i.Sku),
                     PositiveQuantity.Create(i.Quantity),
-                    Price.Create(i.UnitPrice)))];
+                    Price.Create(productsBySku[i.Sku.Trim()].Price)))];
 
         var order = Order.Create(orderId, command.CustomerId, CurrencyCode.Create(command.Currency), items);
         dbContext.Orders.Add(order);
@@ -70,9 +93,7 @@ public static class SubmitOrderHandler
             itemDtos,
             order.CreatedAtUtc,
             command.ProviderRateId,
-            command.DestinationAddress,
-            command.Dimensions,
-            command.Weight
+            command.DestinationAddress
         ));
 
         var dto = new OrderDto(

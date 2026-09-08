@@ -35,42 +35,19 @@ public class EstimateShippingRatesQueryValidator : AbstractValidator<QueryShippi
                 .WithMessage("Country must be a 2-letter ISO country code.");
         });
 
-        RuleFor(x => x.Dimensions)
-            .NotNull()
-            .WithMessage("Dimensions are required.");
+        RuleFor(x => x.Items)
+            .NotEmpty()
+            .WithMessage("At least one shipment item is required.");
 
-        When(x => x.Dimensions is not null, () =>
+        RuleForEach(x => x.Items).ChildRules(item =>
         {
-            RuleFor(x => x.Dimensions.Length)
-                .GreaterThan(0)
-                .WithMessage("Length must be greater than zero.");
-
-            RuleFor(x => x.Dimensions.Width)
-                .GreaterThan(0)
-                .WithMessage("Width must be greater than zero.");
-
-            RuleFor(x => x.Dimensions.Height)
-                .GreaterThan(0)
-                .WithMessage("Height must be greater than zero.");
-
-            RuleFor(x => x.Dimensions.Unit)
+            item.RuleFor(i => i.Sku)
                 .NotEmpty()
-                .WithMessage("Dimension unit is required.");
-        });
+                .WithMessage("Item SKU is required.");
 
-        RuleFor(x => x.Weight)
-            .NotNull()
-            .WithMessage("Weight is required.");
-
-        When(x => x.Weight is not null, () =>
-        {
-            RuleFor(x => x.Weight.Value)
+            item.RuleFor(i => i.Quantity)
                 .GreaterThan(0)
-                .WithMessage("Weight value must be greater than zero.");
-
-            RuleFor(x => x.Weight.Unit)
-                .NotEmpty()
-                .WithMessage("Weight unit is required.");
+                .WithMessage("Item quantity must be greater than zero.");
         });
     }
 }
