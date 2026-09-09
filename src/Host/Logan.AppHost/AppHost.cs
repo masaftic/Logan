@@ -6,8 +6,7 @@ var inventory = builder.AddProject<Projects.Inventory_Api>("inventory-api")
     .WithHttpEndpoint(port: 5002, name: "http");
 
 var catalog = builder.AddProject<Projects.Catalog_Api>("catalog-api")
-    .WithHttpEndpoint(port: 5005, name: "http")
-    .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development");
+    .WithHttpEndpoint(port: 5005, name: "http");
 
 var ordering = builder.AddProject<Projects.Ordering_Api>("ordering-api")
     .WithHttpEndpoint(port: 5001, name: "http")
@@ -24,12 +23,22 @@ var shipping = builder.AddProject<Projects.Shipping_Api>("shipping-api")
     .WithReference(catalog)
     .WaitFor(catalog);
 
+var mailpit = builder.AddContainer("mailpit", "axllent/mailpit")
+    .WithHttpEndpoint(port: 8025, targetPort: 8025, name: "web")
+    .WithEndpoint(port: 1025, targetPort: 1025, name: "smtp");
+
+var notification = builder.AddProject<Projects.Notification_Api>("notification-api")
+    .WithHttpEndpoint(port: 5006, name: "http")
+    .WithReference(mailpit.GetEndpoint("smtp"))
+    .WaitFor(mailpit);
+
 var apiGateway = builder.AddProject<Projects.ApiGateway>("api-gateway")
     .WithHttpEndpoint(port: 5000, name: "http")
     .WaitFor(ordering)
     .WaitFor(inventory)
     .WaitFor(payment)
     .WaitFor(shipping)
-    .WaitFor(catalog);
+    .WaitFor(catalog)
+    .WaitFor(notification);
 
 builder.Build().Run();

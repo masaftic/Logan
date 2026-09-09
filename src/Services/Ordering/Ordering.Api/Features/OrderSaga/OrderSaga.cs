@@ -2,6 +2,7 @@ using Inventory.Contracts.Commands;
 using Microsoft.EntityFrameworkCore;
 using Ordering.Api.Data;
 using Ordering.Api.Domain.Enums;
+using Ordering.Contracts.DTOs;
 using Ordering.Contracts.Events;
 using Payment.Contracts.Commands;
 using Payment.Contracts.Events;
@@ -71,7 +72,7 @@ public class OrderSaga : Saga
         return (saga, initializePayment);
     }
 
-    public async Task<(ConfirmStockDeductionCommand, CommandCreateShipment)> Handle(
+    public async Task<(ConfirmStockDeductionCommand, CommandCreateShipment, OrderConfirmedEvent)> Handle(
         PaymentCompletedEvent @event,
         OrderDbContext dbContext,
         ILogger<OrderSaga> logger,
@@ -87,6 +88,10 @@ public class OrderSaga : Saga
             orderSummary.UpdatePaymentStatus(PaymentStatus.Captured);
         }
 
+        var order = await dbContext.Orders
+            .Include(o => o.Items)
+            .SingleOrDefaultAsync(o => o.Id == Id, ct);
+
         await dbContext.SaveChangesAsync(ct);
 
         var confirmStock = new ConfirmStockDeductionCommand(Id);
@@ -97,9 +102,23 @@ public class OrderSaga : Saga
             DestinationAddress: DestinationAddress,
             Items: ShipmentItems);
 
-        logger.LogInformation("Payment completed for Order {OrderId}. Dispatching stock confirmation and shipment label purchase concurrently.", Id);
+        List<OrderItemDto> itemDtos = order is not null
+            ? [.. order.Items.Select(i => new OrderItemDto(i.Sku, i.Quantity, i.UnitPrice, i.TotalPrice))]
+            : [];
 
-        return (confirmStock, createShipment);
+        var orderConfirmed = new OrderConfirmedEvent(
+            OrderId: Id,
+            CustomerId: CustomerId,
+            TotalAmount: TotalAmount,
+            Currency: Currency,
+            Items: itemDtos,
+            DestinationAddress: DestinationAddress,
+            PaymentIntentId: @event.PaymentIntentId,
+            ConfirmedAtUtc: @event.CompletedAtUtc);
+
+        logger.LogInformation("Payment completed for Order {OrderId}. Publishing OrderConfirmedEvent and dispatching stock confirmation and shipment label purchase.", Id);
+
+        return (confirmStock, createShipment, orderConfirmed);
     }
 
     public async Task<OrderCompletedEvent> Handle(

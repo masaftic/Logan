@@ -28,4 +28,8 @@
     <Project Path="src/Services/Catalog/Catalog.Contracts/Catalog.Contracts.csproj" />
     <Project Path="src/Services/Catalog/Catalog.Api/Catalog.Api.csproj" />
   </Folder>
+  <Folder Name="/Services/Notification/">
+    <Project Path="src/Services/Notification/Notification.Contracts/Notification.Contracts.csproj" />
+    <Project Path="src/Services/Notification/Notification.Api/Notification.Api.csproj" />
+  </Folder>
 </Solution>
