@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Npgsql;
+using OpenTelemetry;
 using Thinktecture;
 
 namespace BuildingBlocks.Persistence.Extensions;
@@ -33,6 +35,10 @@ public static class PersistenceExtensions
             .UseSnakeCaseNamingConvention()
             .UseThinktectureValueConverters();
         });
+
+        services.AddOpenTelemetry()
+            .WithTracing(tracing => tracing.AddNpgsql())
+            .WithMetrics(metrics => metrics.AddNpgsqlInstrumentation());
 
         return services;
     }

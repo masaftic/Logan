@@ -25,7 +25,12 @@ public static class SubmitOrderHandler
         IMessageBus bus,
         CancellationToken ct)
     {
+        using var activity = OrderingDiagnostics.ActivitySource.StartActivity("SubmitOrderProcess");
+        activity?.SetTag("customer.id", command.CustomerId);
+        activity?.SetTag("order.items_count", command.Items.Count);
+
         var orderId = Guid.CreateVersion7();
+        activity?.SetTag("order.id", orderId);
 
         var uniqueSkus = command.Items.Select(i => i.Sku.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         var productsResult = await catalogClient.GetProductsBySkusAsync(uniqueSkus, ct);
@@ -68,6 +73,10 @@ public static class SubmitOrderHandler
 
         var order = Order.Create(orderId, command.CustomerId, CurrencyCode.Create(command.Currency), items);
         dbContext.Orders.Add(order);
+
+        activity?.SetTag("order.total_amount", order.TotalAmount);
+        OrderingDiagnostics.OrdersSubmittedCounter.Add(1, new KeyValuePair<string, object?>("currency", command.Currency));
+        OrderingDiagnostics.OrderValueHistogram.Record(order.TotalAmount, new KeyValuePair<string, object?>("currency", command.Currency));
 
         var orderSummary = OrderSummary.Create(
             order.Id,
