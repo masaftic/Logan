@@ -38,6 +38,17 @@ services:
       timeout: 5s
       retries: 5
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: logan-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI & REST API
+    environment:
+      MP_MAX_MESSAGES: 500
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+
   # -----------------------------------------------------------
   # Microservices
   # -----------------------------------------------------------
@@ -78,6 +89,29 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+
+  notification-api:
+    build:
+      context: .
+      dockerfile: src/Services/Notification/Notification.Api/Dockerfile
+    container_name: notification-api
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__Database=Host=postgres;Port=5432;Database=orders_db;Username=postgres;Password=postgres
+      - ConnectionStrings__RabbitMQ=amqp://guest:guest@rabbitmq:5672
+      - Smtp__Host=mailpit
+      - Smtp__Port=1025
+    ports:
+      - "5006:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
 
   # -----------------------------------------------------------
   # API Gateway (YARP Reverse Proxy)

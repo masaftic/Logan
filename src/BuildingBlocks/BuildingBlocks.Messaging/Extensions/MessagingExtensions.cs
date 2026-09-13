@@ -40,14 +40,7 @@ public static class MessagingExtensions
                         type.Namespace?.Contains("Queries") != true &&
                         !type.Name.EndsWith("Query") &&
                         type.Assembly.GetName().Name != "BuildingBlocks.Common");
-                    if (!string.IsNullOrWhiteSpace(schemaName))
-                    {
-                        conventions.QueueNameForListener(type => $"{schemaName}.{type.FullName}");
-                    }
                 });
-
-            // Ensure messages with local handlers are also published to external broker (RabbitMQ)
-            opts.Policies.ConventionalLocalRoutingIsAdditive();
 
             // Persist message envelopes in PostgreSQL
             opts.PersistMessagesWithPostgresql(dbConnectionString, schemaName);
