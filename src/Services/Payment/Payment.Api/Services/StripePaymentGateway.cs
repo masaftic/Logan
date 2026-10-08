@@ -45,7 +45,7 @@ public class StripePaymentGateway : IStripePaymentGateway
 
             var requestOptions = new RequestOptions
             {
-                IdempotencyKey = $"pi:{paymentId}"
+                IdempotencyKey = $"pi:order:{orderId}"
             };
 
             var service = new PaymentIntentService(_client);
