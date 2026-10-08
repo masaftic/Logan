@@ -38,7 +38,17 @@ app.MapGet("/", () => Results.Ok(new
 {
     Gateway = "API Gateway (YARP)",
     Status = "Healthy",
-    Routes = new[] { "/api/checkout", "/api/orders/*", "/api/inventory/*", "/api/payments/*", "/api/shipping/*" },
+    Routes = new[]
+    {
+        "/api/checkout",
+        "/api/orders/*",
+        "/api/inventory/*",
+        "/api/payments/*",
+        "/api/shipping/*",
+        "/api/products/*",
+        "/api/categories/*",
+        "/api/notifications/*"
+    },
     Timestamp = DateTime.UtcNow
 }));
 
