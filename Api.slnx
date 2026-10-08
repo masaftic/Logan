@@ -32,4 +32,7 @@
     <Project Path="src/Services/Notification/Notification.Contracts/Notification.Contracts.csproj" />
     <Project Path="src/Services/Notification/Notification.Api/Notification.Api.csproj" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/IntegrationTests/IntegrationTests.csproj" />
+  </Folder>
 </Solution>
