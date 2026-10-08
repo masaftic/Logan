@@ -26,7 +26,7 @@ builder.Services.AddOpenApi(options =>
     {
         if (context.JsonTypeInfo.Type == typeof(Guid))
         {
-            schema.Example = JsonValue.Create(Guid.NewGuid().ToString());
+            schema.Examples = [JsonValue.Create(Guid.NewGuid().ToString())];
         }
 
         return Task.CompletedTask;
