@@ -3,12 +3,16 @@ WORKDIR /app
 
 # Copy project files
 COPY src/BuildingBlocks/BuildingBlocks.Common/BuildingBlocks.Common.csproj src/BuildingBlocks/BuildingBlocks.Common/
+COPY src/Services/Ordering/Ordering.Contracts/Ordering.Contracts.csproj src/Services/Ordering/Ordering.Contracts/
+COPY src/Services/Payment/Payment.Contracts/Payment.Contracts.csproj src/Services/Payment/Payment.Contracts/
 COPY src/Host/ApiGateway/ApiGateway.csproj src/Host/ApiGateway/
 
 RUN dotnet restore src/Host/ApiGateway/ApiGateway.csproj
 
 # Copy source code
 COPY src/BuildingBlocks/BuildingBlocks.Common/ src/BuildingBlocks/BuildingBlocks.Common/
+COPY src/Services/Ordering/Ordering.Contracts/ src/Services/Ordering/Ordering.Contracts/
+COPY src/Services/Payment/Payment.Contracts/ src/Services/Payment/Payment.Contracts/
 COPY src/Host/ApiGateway/ src/Host/ApiGateway/
 
 WORKDIR /app/src/Host/ApiGateway

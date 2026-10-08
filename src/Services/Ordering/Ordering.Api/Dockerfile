@@ -6,13 +6,22 @@ COPY src/BuildingBlocks/BuildingBlocks.Common/BuildingBlocks.Common.csproj src/B
 COPY src/BuildingBlocks/BuildingBlocks.Persistence/BuildingBlocks.Persistence.csproj src/BuildingBlocks/BuildingBlocks.Persistence/
 COPY src/BuildingBlocks/BuildingBlocks.Messaging/BuildingBlocks.Messaging.csproj src/BuildingBlocks/BuildingBlocks.Messaging/
 COPY src/Services/Ordering/Ordering.Contracts/Ordering.Contracts.csproj src/Services/Ordering/Ordering.Contracts/
+COPY src/Services/Inventory/Inventory.Contracts/Inventory.Contracts.csproj src/Services/Inventory/Inventory.Contracts/
+COPY src/Services/Catalog/Catalog.Contracts/Catalog.Contracts.csproj src/Services/Catalog/Catalog.Contracts/
+COPY src/Services/Payment/Payment.Contracts/Payment.Contracts.csproj src/Services/Payment/Payment.Contracts/
+COPY src/Services/Shipping/Shipping.Contracts/Shipping.Contracts.csproj src/Services/Shipping/Shipping.Contracts/
 COPY src/Services/Ordering/Ordering.Api/Ordering.Api.csproj src/Services/Ordering/Ordering.Api/
 
 RUN dotnet restore src/Services/Ordering/Ordering.Api/Ordering.Api.csproj
 
 # Copy source code
 COPY src/BuildingBlocks/ src/BuildingBlocks/
-COPY src/Services/Ordering/ src/Services/Ordering/
+COPY src/Services/Ordering/Ordering.Contracts/ src/Services/Ordering/Ordering.Contracts/
+COPY src/Services/Inventory/Inventory.Contracts/ src/Services/Inventory/Inventory.Contracts/
+COPY src/Services/Catalog/Catalog.Contracts/ src/Services/Catalog/Catalog.Contracts/
+COPY src/Services/Payment/Payment.Contracts/ src/Services/Payment/Payment.Contracts/
+COPY src/Services/Shipping/Shipping.Contracts/ src/Services/Shipping/Shipping.Contracts/
+COPY src/Services/Ordering/Ordering.Api/ src/Services/Ordering/Ordering.Api/
 
 WORKDIR /app/src/Services/Ordering/Ordering.Api
 RUN dotnet publish -c Release -o /out
